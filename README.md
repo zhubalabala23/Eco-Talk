@@ -1,16 +1,16 @@
-# React + Vite
+# 🌱 Eco Talk
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Eco Talk adalah platform pembelajaran digital interaktif yang dirancang khusus untuk siswa kelas 5 SD. Aplikasi ini bertujuan untuk meningkatkan kesadaran dan pemahaman siswa terhadap isu-isu lingkungan seperti **Banjir** dan **Polusi**.
 
-Currently, two official plugins are available:
+## ✨ Fitur Utama
+- **Materi Interaktif:** Pembelajaran menggunakan video yang disinkronkan dengan narasi suara (Text-to-Speech) untuk pengalaman belajar yang lebih menarik.
+- **Sistem Penilaian Siswa:** Siswa dapat merekam suara mereka untuk menjawab pertanyaan, yang kemudian akan disimpan untuk dievaluasi.
+- **Dasbor Guru (Teacher View):** Antarmuka khusus untuk guru mendengarkan rekaman siswa dan memberikan nilai menggunakan rubrik penilaian yang sudah disediakan.
+- **Rubrik Penilaian Terintegrasi:** Halaman khusus agar siswa mengetahui kriteria penilaian sebelum memulai pembelajaran.
+- **Penyimpanan Cloud:** Menggunakan Firebase Storage untuk menyimpan aset video dan audio.
+- **Desain Responsif & Menarik:** UI/UX yang modern, penuh warna, dan mudah digunakan oleh anak-anak.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Teknologi yang Digunakan
+- React.js / Vite
+- Firebase Storage
+- Vercel (untuk Deployment)
