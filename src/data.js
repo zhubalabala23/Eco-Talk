@@ -1,5 +1,4 @@
 import polusiVideo from './assets/video/Ilustrasi Asap Pabrik & Selokan Kumuh.mp4';
-import banjirVideo from './assets/video/Materi Banjir 25 Halaman.mp4';
 
 export const topics = [
   {
@@ -11,7 +10,7 @@ export const topics = [
     shadow: "shadow-blue-200/40",
     material: {
       image: "https://images.unsplash.com/photo-1547683905-f30e61882f25?auto=format&fit=crop&w=800&q=80",
-      localVideo: banjirVideo,
+      localVideo: "https://res.cloudinary.com/dcr2wy06s/video/upload/Materi_Banjir_25_Halaman_qz1ip8.mp4",
       text: "Banjir merupakan peristiwa ketika air menggenangi suatu wilayah dalam jumlah yang banyak. Banjir biasanya terjadi saat hujan turun sangat deras dalam waktu yang lama. Saat banjir terjadi, jalanan dipenuhi air dan aktivitas masyarakat menjadi terganggu. Ada kendaraan yang sulit lewat, rumah warga terendam, bahkan anak-anak terkadang tidak bisa pergi ke sekolah.\nNamun, banjir tidak hanya disebabkan oleh hujan. \nDi beberapa tempat, masih ada orang yang membuang sampah ke sungai dan selokan. Sampah yang menumpuk membuat aliran air menjadi tersumbat. Ketika hujan turun, air tidak dapat mengalir dengan lancar sehingga meluap ke jalan dan rumah warga.\n\nSelain itu, banyak pohon ditebang untuk membuka lahan atau mendirikan bangunan. Padahal, akar pohon membantu menyerap air hujan ke dalam tanah. Jika pohon semakin sedikit, air hujan akan lebih mudah menggenang di permukaan tanah.\n\nBanjir dapat menyebabkan lingkungan menjadi kotor karena air bercampur dengan lumpur dan sampah. Genangan air yang kotor juga dapat menjadi tempat berkembangnya kuman dan nyamuk penyebab penyakit. Akibatnya, masyarakat dapat terkena penyakit seperti gatal-gatal, demam berdarah, dan diare. \nOleh sebab itu, kita harus menjaga lingkungan dengan baik, seperti membuang sampah pada tempatnya, membersihkan saluran air, dan menanam pohon agar banjir dapat dikurangi.",
       question: "Apa yang bisa kita lakukan untuk mencegah terjadinya banjir di lingkungan sekitar kita?"
     }

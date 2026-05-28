@@ -11,6 +11,15 @@ const Tree = ({ className }) => (
   </svg>
 );
 
+const SmallPlant = ({ className }) => (
+  <svg viewBox="0 0 50 50" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M25 50 L25 20" stroke="#15803d" strokeWidth="3" strokeLinecap="round" />
+    <path d="M25 35 Q15 35 15 25 Q25 25 25 35" fill="#22c55e" />
+    <path d="M25 30 Q35 30 35 20 Q25 20 25 30" fill="#4ade80" />
+    <path d="M25 25 Q18 15 25 10 Q32 15 25 25" fill="#16a34a" />
+  </svg>
+);
+
 const Cloud = ({ className }) => (
   <svg viewBox="0 0 100 50" className={className} xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>
     <circle cx="30" cy="25" r="15" fill="white" />
@@ -47,6 +56,11 @@ const CharacterPlanting = ({ className }) => (
     
     {/* Head */}
     <circle cx="70" cy="55" r="25" fill="#fcd34d" />
+    {/* Face */}
+    <circle cx="62" cy="50" r="3" fill="#334155" />
+    <circle cx="76" cy="50" r="3" fill="#334155" />
+    <ellipse cx="69" cy="56" rx="2" ry="3" fill="#b45309" opacity="0.6" />
+    <path d="M60 62 Q69 68 78 62" stroke="#334155" strokeWidth="2.5" fill="none" strokeLinecap="round" />
     {/* Hat */}
     <path d="M30 40 Q70 0 110 40 Q70 50 30 40 Z" fill="#eab308" />
     
@@ -87,6 +101,11 @@ const CharacterSitting = ({ className }) => (
     <rect x="60" y="70" width="30" height="40" rx="10" fill="#f87171" />
     {/* Head */}
     <circle cx="75" cy="50" r="22" fill="#fcd34d" />
+    {/* Face */}
+    <circle cx="68" cy="46" r="2.5" fill="#334155" />
+    <circle cx="82" cy="46" r="2.5" fill="#334155" />
+    <ellipse cx="75" cy="52" rx="1.5" ry="2.5" fill="#b45309" opacity="0.6" />
+    <path d="M68 57 Q75 62 82 57" stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" />
     {/* Hair/Hat */}
     <path d="M50 45 Q75 10 100 45 Z" fill="#b45309" />
     
@@ -111,6 +130,11 @@ const CharacterWaving = ({ className }) => (
     
     {/* Head */}
     <circle cx="75" cy="55" r="25" fill="#fcd34d" />
+    {/* Face */}
+    <circle cx="67" cy="50" r="3" fill="#334155" />
+    <circle cx="83" cy="50" r="3" fill="#334155" />
+    <ellipse cx="75" cy="57" rx="2" ry="3" fill="#b45309" opacity="0.6" />
+    <path d="M66 64 Q75 70 84 64" stroke="#334155" strokeWidth="2.5" fill="none" strokeLinecap="round" />
     {/* Hair */}
     <path d="M45 55 Q75 10 105 55 Q75 30 45 55 Z" fill="#1e293b" />
     
@@ -134,7 +158,7 @@ export default function LandingPage({ onStart }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, y: -20 }}
-      className="min-h-screen w-full flex flex-col items-center justify-center relative bg-gradient-to-b from-[#e0f2fe] to-[#bae6fd] overflow-hidden"
+      className="min-h-screen w-full flex flex-col items-center justify-center relative bg-gradient-to-b from-[#7dd3fc] to-[#3b82f6] overflow-hidden"
     >
       {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
@@ -174,7 +198,11 @@ export default function LandingPage({ onStart }) {
         <Tree className="absolute bottom-[15%] right-[5%] w-28 h-36 md:w-40 md:h-48" />
 
         {/* Lake */}
-        <Lake className="absolute bottom-[2%] md:bottom-[4%] left-[50%] -ml-[128px] md:-ml-[160px] w-64 h-24 md:w-80 md:h-32 opacity-90 z-0" />
+        <Lake className="absolute bottom-[2%] md:bottom-[4%] left-[50%] -ml-[200px] md:-ml-[350px] w-[400px] h-40 md:w-[700px] md:h-60 opacity-90 z-0" />
+
+        {/* Small Plants near the lake edge */}
+        <SmallPlant className="absolute bottom-[22%] md:bottom-[28%] left-[18%] md:left-[22%] w-8 h-8 md:w-12 md:h-12 z-10" />
+        <SmallPlant className="absolute bottom-[20%] md:bottom-[26%] right-[18%] md:right-[22%] w-10 h-10 md:w-14 md:h-14 z-10" />
 
         {/* Character 1 (Left of lake, waving) */}
         <motion.div 

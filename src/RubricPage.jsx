@@ -19,6 +19,11 @@ const CharacterWalking = ({ className }) => (
     <rect x="55" y="80" width="40" height="50" rx="10" fill="#f43f5e" />
     {/* Head */}
     <circle cx="75" cy="55" r="22" fill="#fca5a5" />
+    {/* Face */}
+    <circle cx="68" cy="51" r="2.5" fill="#334155" />
+    <circle cx="82" cy="51" r="2.5" fill="#334155" />
+    <ellipse cx="75" cy="57" rx="1.5" ry="2.5" fill="#ef4444" opacity="0.5" />
+    <path d="M68 62 Q75 67 82 62" stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" />
     {/* Hair */}
     <path d="M50 55 Q75 20 100 55 Z" fill="#475569" />
     {/* Legs walking */}

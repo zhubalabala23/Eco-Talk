@@ -20,6 +20,11 @@ const CharacterWalking = ({ className }) => (
     <rect x="55" y="80" width="40" height="50" rx="10" fill="#f43f5e" />
     {/* Head */}
     <circle cx="75" cy="55" r="22" fill="#fca5a5" />
+    {/* Face */}
+    <circle cx="68" cy="51" r="2.5" fill="#334155" />
+    <circle cx="82" cy="51" r="2.5" fill="#334155" />
+    <ellipse cx="75" cy="57" rx="1.5" ry="2.5" fill="#ef4444" opacity="0.5" />
+    <path d="M68 62 Q75 67 82 62" stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" />
     {/* Hair */}
     <path d="M50 55 Q75 20 100 55 Z" fill="#475569" />
     {/* Legs walking */}
@@ -37,17 +42,25 @@ const CharacterWalking = ({ className }) => (
 export default function RegistrationView({ onComplete }) {
   const [name, setName] = useState('');
   const [absen, setAbsen] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (name && absen) {
-      const student = {
-        id: `student_${Date.now()}`,
-        name,
-        absen,
-      };
-      await saveStudent(student);
-      onComplete(student);
+      setIsLoading(true);
+      try {
+        const studentData = {
+          name,
+          absen,
+        };
+        const savedStudent = await saveStudent(studentData);
+        onComplete(savedStudent);
+      } catch (error) {
+        console.error("Firebase Error:", error);
+        alert("Gagal menyimpan data! Pesan Error: " + error.message + "\n\nPastikan Rules Firebase sudah diubah menjadi 'true' (allow read, write: if true;)");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -124,9 +137,10 @@ export default function RegistrationView({ onComplete }) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="w-full flex items-center justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white bg-[#315588] hover:bg-[#233f66] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mt-4"
+            disabled={isLoading}
+            className={`w-full flex items-center justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mt-4 ${isLoading ? 'bg-slate-400 cursor-not-allowed' : 'bg-[#315588] hover:bg-[#233f66]'}`}
           >
-            Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" />
+            {isLoading ? 'Memuat Data...' : <span className="flex items-center">Mulai Belajar <ArrowRight className="ml-2 w-5 h-5" /></span>}
           </motion.button>
         </form>
       </motion.div>

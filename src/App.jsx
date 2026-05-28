@@ -19,13 +19,46 @@ const iconMap = {
 
 // Main App Component
 export default function App() {
-  const [view, setView] = useState('landing'); // 'landing', 'register', 'rubric', 'home', 'story', 'answer', 'closing', 'teacher'
-  const [selectedTopic, setSelectedTopic] = useState(null);
-  const [studentInfo, setStudentInfo] = useState(null);
+  const [studentInfo, setStudentInfo] = useState(() => {
+    const saved = localStorage.getItem('ecoTalkStudent');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [view, setView] = useState(() => {
+    const savedStudent = localStorage.getItem('ecoTalkStudent');
+    const savedView = localStorage.getItem('ecoTalkView');
+    if (savedStudent && savedView && savedView !== 'landing' && savedView !== 'register') {
+      return savedView;
+    }
+    return savedStudent ? 'home' : 'landing';
+  });
+  const [selectedTopic, setSelectedTopic] = useState(() => {
+    const saved = localStorage.getItem('ecoTalkTopic');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [progress, setProgress] = useState(() => {
     const saved = localStorage.getItem('ecoTalkProgress');
     return saved ? JSON.parse(saved) : {};
   });
+
+  useEffect(() => {
+    if (studentInfo) {
+      localStorage.setItem('ecoTalkStudent', JSON.stringify(studentInfo));
+    } else {
+      localStorage.removeItem('ecoTalkStudent');
+    }
+  }, [studentInfo]);
+
+  useEffect(() => {
+    localStorage.setItem('ecoTalkView', view);
+  }, [view]);
+
+  useEffect(() => {
+    if (selectedTopic) {
+      localStorage.setItem('ecoTalkTopic', JSON.stringify(selectedTopic));
+    } else {
+      localStorage.removeItem('ecoTalkTopic');
+    }
+  }, [selectedTopic]);
 
   const navigateTo = (newView, topic = null) => {
     if (topic) setSelectedTopic(topic);
@@ -34,10 +67,17 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('ecoTalkProgress');
-    setProgress({});
-    setStudentInfo(null);
-    navigateTo('landing');
+    const confirmLogout = window.confirm("Apakah Anda yakin ingin keluar?");
+    if (confirmLogout) {
+      localStorage.removeItem('ecoTalkProgress');
+      localStorage.removeItem('ecoTalkStudent');
+      localStorage.removeItem('ecoTalkView');
+      localStorage.removeItem('ecoTalkTopic');
+      setProgress({});
+      setStudentInfo(null);
+      setSelectedTopic(null);
+      navigateTo('landing');
+    }
   };
 
   const markProgress = (topicId, type) => {
