@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDkCAXCZGzBzWinm_jBtXacIu0KLcB2uaE",
-  authDomain: "eco-talk-webapp.firebaseapp.com",
-  projectId: "eco-talk-webapp",
-  storageBucket: "eco-talk-webapp.firebasestorage.app",
-  messagingSenderId: "371889778678",
-  appId: "1:371889778678:web:f0d3ac42a38f9d4a8061d7"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
