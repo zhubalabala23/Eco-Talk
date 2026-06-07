@@ -57,7 +57,7 @@ export default function RegistrationView({ onComplete }) {
         onComplete(savedStudent);
       } catch (error) {
         console.error("Firebase Error:", error);
-        alert("Gagal menyimpan data! Pesan Error: " + error.message + "\n\nPastikan Rules Firebase sudah diubah menjadi 'true' (allow read, write: if true;)");
+        alert(error.message);
       } finally {
         setIsLoading(false);
       }

@@ -127,7 +127,6 @@ export default function App() {
             {view !== 'register' && view !== 'closing' && view !== 'rubric' && (
               <button 
                 onClick={() => {
-                  window.speechSynthesis.cancel();
                   if (view === 'answer') {
                     navigateTo('story', selectedTopic);
                   } else if (view === 'story') {
@@ -147,7 +146,6 @@ export default function App() {
             {(view === 'story' || view === 'answer') && (
               <button 
                 onClick={() => {
-                  window.speechSynthesis.cancel();
                   navigateTo('home');
                 }}
                 className="absolute right-4 md:right-8 p-2 rounded-full hover:bg-slate-200/50 transition-colors"
@@ -329,7 +327,6 @@ function StoryPlayer({ topic, onComplete, onNext }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); 
   const [hasFinished, setHasFinished] = useState(false);
-  const utteranceRef = useRef(null);
   const animFrameRef = useRef(null);
   const videoRef = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -346,36 +343,8 @@ function StoryPlayer({ topic, onComplete, onNext }) {
   const words = topic.material.text.split(' ').length;
   const estimatedSeconds = Math.max((words / 150) * 60, 5); 
 
-  const createUtterance = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'id-ID';
-    const voices = window.speechSynthesis.getVoices();
-    const idVoices = voices.filter(v => v.lang.startsWith('id'));
-    if (idVoices.length > 0) {
-      utterance.voice = idVoices.find(v => v.name.includes('Female') || v.name.includes('Google')) || idVoices[0];
-    }
-    // Set a fast reading rate so students don't get bored
-    utterance.rate = 1.25;
-    utterance.pitch = 1.1;
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setProgress(100);
-      setHasFinished(true);
-      if (videoRef.current) {
-        videoRef.current.pause();
-      }
-      if (onComplete) onComplete();
-    };
-    return utterance;
-  };
-
   useEffect(() => {
-    if (topic.material.videoUrl) return;
-
-    utteranceRef.current = createUtterance(topic.material.text);
-    
     return () => {
-      window.speechSynthesis.cancel();
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, [topic, onComplete]);
@@ -401,7 +370,14 @@ function StoryPlayer({ topic, onComplete, onNext }) {
         const elapsed = (timestamp - startTime - pausedTime) / 1000;
         let percent = (elapsed / estimatedSeconds) * 100;
         
-        if (percent >= 99) percent = 99;
+        if (percent >= 100) {
+          percent = 100;
+          setProgress(percent);
+          setIsPlaying(false);
+          setHasFinished(true);
+          if (onComplete) onComplete();
+          return;
+        }
         setProgress(percent);
       }
       
@@ -410,30 +386,19 @@ function StoryPlayer({ topic, onComplete, onNext }) {
 
     animFrameRef.current = requestAnimationFrame(animateProgress);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [isPlaying, estimatedSeconds, topic.material.videoUrl]);
+  }, [isPlaying, estimatedSeconds, topic.material.videoUrl, onComplete]);
 
   const togglePlay = () => {
     if (topic.material.videoUrl) return;
 
     if (isPlaying) {
-      window.speechSynthesis.pause();
       if (videoRef.current) videoRef.current.pause();
       setIsPlaying(false);
     } else {
       if (progress > 0 && progress < 100 && !hasFinished) {
-        if (hasSeekedRef.current) {
-          window.speechSynthesis.speak(utteranceRef.current);
-          hasSeekedRef.current = false;
-        } else {
-          window.speechSynthesis.resume();
-        }
         if (videoRef.current) videoRef.current.play();
       } else {
         setProgress(0);
-        window.speechSynthesis.cancel();
-        
-        utteranceRef.current = createUtterance(topic.material.text);
-        window.speechSynthesis.speak(utteranceRef.current);
         
         if (videoRef.current) {
           videoRef.current.currentTime = 0;
@@ -449,14 +414,10 @@ function StoryPlayer({ topic, onComplete, onNext }) {
   const replay = () => {
     if (topic.material.videoUrl) return;
 
-    window.speechSynthesis.cancel();
     setProgress(0);
     setIsPlaying(true);
     setHasFinished(false);
     hasSeekedRef.current = false;
-    
-    utteranceRef.current = createUtterance(topic.material.text);
-    window.speechSynthesis.speak(utteranceRef.current);
     
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
@@ -475,19 +436,6 @@ function StoryPlayer({ topic, onComplete, onNext }) {
     setProgress(pos * 100);
     setHasFinished(false);
     hasSeekedRef.current = true;
-
-    window.speechSynthesis.cancel();
-
-    const wordsArray = topic.material.text.split(' ');
-    const wordIndex = Math.floor(pos * wordsArray.length);
-    const remainingText = wordsArray.slice(wordIndex).join(' ');
-
-    utteranceRef.current = createUtterance(remainingText);
-
-    if (isPlaying) {
-      hasSeekedRef.current = false;
-      window.speechSynthesis.speak(utteranceRef.current);
-    }
   };
 
   return (
@@ -512,9 +460,10 @@ function StoryPlayer({ topic, onComplete, onNext }) {
               <video
                 ref={videoRef}
                 src={topic.material.localVideo}
-                className="w-full h-full object-cover"
+                poster={topic.material.localVideo.replace('.mp4', '.jpg')}
+                className="w-full h-full object-cover bg-slate-200"
                 playsInline
-                muted
+                preload="auto"
                 onTimeUpdate={() => {
                   if (videoRef.current) {
                     const ct = videoRef.current.currentTime;
@@ -528,30 +477,17 @@ function StoryPlayer({ topic, onComplete, onNext }) {
                   if (videoRef.current) {
                     const dur = videoRef.current.duration;
                     setDuration(dur);
-                    
-                    if (topic.material.text) {
-                      // Calculate how long the fast voice (rate 1.25) will take
-                      const words = topic.material.text.split(' ').length;
-                      const estStandardDuration = (words / 130) * 60;
-                      const fastVoiceDuration = estStandardDuration / 1.25;
-                      
-                      // Speed up the video to match this fast voice duration
-                      let requiredVideoRate = dur / fastVoiceDuration;
-                      
-                      // Clamp video speed to avoid browser errors
-                      if (requiredVideoRate < 0.5) requiredVideoRate = 0.5;
-                      if (requiredVideoRate > 4.0) requiredVideoRate = 4.0;
-                      
-                      videoRef.current.playbackRate = requiredVideoRate;
-                    } else {
-                      videoRef.current.playbackRate = 1.0;
-                    }
+                    videoRef.current.playbackRate = 1.0;
                   }
                 }}
                 onEnded={() => {
+                  setIsPlaying(false);
+                  setProgress(100);
+                  setHasFinished(true);
                   if (videoRef.current) {
                     videoRef.current.pause();
                   }
+                  if (onComplete) onComplete();
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />

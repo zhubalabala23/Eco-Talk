@@ -40,7 +40,7 @@ export const saveStudent = async (studentData) => {
       return { id: existingDoc.id, ...existingData };
     } else {
       // Namanya ada, tapi absennya BEDA. Tolak.
-      throw new Error(`Nama "${studentData.name}" sudah terdaftar! Gunakan nama lain atau masukkan absen yang benar jika itu Anda.`);
+      throw new Error(`Maaf, nama "${studentData.name}" sudah dipakai oleh siswa lain. Jika ini adalah kamu, pastikan Nomor Absen yang dimasukkan benar. Jika bukan, silakan tambahkan nama belakangmu agar tidak duplikat.`);
     }
   }
 
@@ -111,4 +111,10 @@ export const getStudents = async () => {
 export const deleteAssessment = async (id) => {
   const docRef = doc(db, 'assessments', id);
   await deleteDoc(docRef);
+};
+
+export const updateStudentProgress = async (studentId, progress) => {
+  if (!studentId) return;
+  const studentRef = doc(db, 'students', studentId);
+  await updateDoc(studentRef, { progress });
 };
