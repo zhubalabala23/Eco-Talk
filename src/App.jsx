@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Waves, Trash2, Factory, TreePine, Droplets, Play, Pause, RotateCcw, Mic, Square, Check, Home, ChevronLeft, Volume2, ArrowRight, ClipboardList, LogOut } from 'lucide-react';
+import { Waves, Trash2, Factory, TreePine, Droplets, Play, Pause, RotateCcw, Mic, Square, Check, Home, ChevronLeft, Volume2, ArrowRight, ClipboardList, LogOut, Menu } from 'lucide-react';
 import { topics } from './data';
 import LandingPage from './LandingPage';
 import RegistrationView from './RegistrationView';
@@ -8,6 +8,7 @@ import ClosingView from './ClosingView';
 import TeacherView from './TeacherView';
 import RubricPage from './RubricPage';
 import { saveAssessment } from './db';
+import ceweAudio from './assets/images/cewe_audio.png';
 
 const iconMap = {
   Waves,
@@ -39,6 +40,7 @@ export default function App() {
     const saved = localStorage.getItem('ecoTalkProgress');
     return saved ? JSON.parse(saved) : {};
   });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (studentInfo) {
@@ -99,13 +101,7 @@ export default function App() {
   if (view === 'teacher') {
     return (
       <div className="relative">
-        <button 
-          onClick={() => navigateTo('home')}
-          className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md z-50 text-slate-500 hover:text-slate-800"
-        >
-          <Home className="w-6 h-6" />
-        </button>
-        <TeacherView onLogout={handleLogout} />
+        <TeacherView onLogout={handleLogout} onHome={() => navigateTo('home')} />
       </div>
     );
   }
@@ -156,20 +152,51 @@ export default function App() {
 
             {view === 'home' && (
               <div className="absolute right-4 md:right-8 flex items-center gap-2">
+                {/* Mobile Menu Button */}
                 <button 
-                  onClick={() => navigateTo('teacher')}
-                  className="p-2 rounded-full hover:bg-slate-200/50 transition-colors flex flex-col items-center group relative"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="md:hidden p-2 rounded-full hover:bg-slate-200/50 transition-colors"
                 >
-                  <ClipboardList className="w-6 h-6 text-[#315588]" />
-                  <span className="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Penilaian</span>
+                  <Menu className="w-6 h-6 text-slate-500" />
                 </button>
-                <button 
-                  onClick={handleLogout}
-                  className="p-2 rounded-full hover:bg-red-50 transition-colors flex flex-col items-center group relative"
-                >
-                  <LogOut className="w-6 h-6 text-red-500" />
-                  <span className="text-[10px] text-red-500 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Keluar</span>
-                </button>
+
+                {/* Mobile Dropdown */}
+                {isMenuOpen && (
+                  <div className="absolute top-12 right-0 bg-white shadow-xl border border-slate-100 rounded-xl p-2 flex flex-col gap-1 md:hidden">
+                    <button 
+                      onClick={() => { navigateTo('teacher'); setIsMenuOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-[#315588] hover:bg-blue-50 rounded-lg whitespace-nowrap"
+                    >
+                      <ClipboardList className="w-4 h-4" />
+                      Penilaian
+                    </button>
+                    <button 
+                      onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg whitespace-nowrap"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Keluar
+                    </button>
+                  </div>
+                )}
+
+                {/* Desktop Buttons */}
+                <div className="hidden md:flex items-center gap-2">
+                  <button 
+                    onClick={() => navigateTo('teacher')}
+                    className="p-2 rounded-full hover:bg-slate-200/50 transition-colors flex flex-col items-center group relative"
+                  >
+                    <ClipboardList className="w-6 h-6 text-[#315588]" />
+                    <span className="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Penilaian</span>
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="p-2 rounded-full hover:bg-red-50 transition-colors flex flex-col items-center group relative"
+                  >
+                    <LogOut className="w-6 h-6 text-red-500" />
+                    <span className="text-[10px] text-red-500 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Keluar</span>
+                  </button>
+                </div>
               </div>
             )}
 
@@ -340,8 +367,99 @@ function StoryPlayer({ topic, onComplete, onNext }) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
   
-  const words = topic.material.text.split(' ').length;
-  const estimatedSeconds = Math.max((words / 150) * 60, 5); 
+  const words = topic.material.text.split(/\s+/).filter(w => w.length > 0);
+  const estimatedSeconds = Math.max((words.length / 2.5), 5); // Rough estimate of 2.5 words per second
+
+  // Calculate timing for each word based on total duration using Natural Speech Pacing
+  const wordTimings = React.useMemo(() => {
+    const totalTime = duration || estimatedSeconds;
+    if (!totalTime || !words.length) return [];
+    
+    // Calculate weights to simulate natural human dictation speed and intonation
+    const wordsWithData = words.map(word => {
+      // Clean word to get actual character length
+      const textLength = word.replace(/[^a-zA-Z0-9]/g, '').length;
+      const weight = Math.max(textLength, 2); 
+      
+      // Determine pauses after the word based on punctuation
+      let pauseAfter = 0;
+      if (word.endsWith(',')) {
+        pauseAfter = 5; // Jeda untuk koma
+      } else if (/[.?!]$/.test(word)) {
+        pauseAfter = 12; // Jeda lebih panjang untuk akhir kalimat (titik)
+      }
+      
+      return { word, weight, pauseAfter };
+    });
+    
+    const totalWeight = wordsWithData.reduce((acc, curr) => acc + curr.weight + curr.pauseAfter, 0);
+    
+    // Provide a small buffer for video intro/outro (e.g., logo, music)
+    const introDelay = totalTime > 15 ? 1.0 : (totalTime > 5 ? 0.5 : 0);
+    const outroDelay = totalTime > 15 ? 1.5 : 0;
+    const activeTime = Math.max(totalTime - introDelay - outroDelay, 5);
+    
+    const timings = [];
+    let currentT = introDelay;
+    
+    wordsWithData.forEach((data, index) => {
+      const speakDuration = (data.weight / totalWeight) * activeTime;
+      const pauseDuration = (data.pauseAfter / totalWeight) * activeTime;
+      
+      timings.push({
+        word: data.word,
+        start: currentT,
+        end: currentT + speakDuration, // Exact time word is spoken
+        chunkEnd: currentT + speakDuration + pauseDuration,
+        index
+      });
+      
+      currentT += (speakDuration + pauseDuration);
+    });
+    
+    return timings;
+  }, [duration, words, estimatedSeconds]);
+
+  // Group words into subtitle chunks (3 sentences per chunk)
+  const subtitleChunks = React.useMemo(() => {
+    if (!wordTimings.length) return [];
+    const totalTime = duration || estimatedSeconds;
+    const result = [];
+    let currentChunk = [];
+    let sentencesInChunk = 0;
+    
+    wordTimings.forEach((wt) => {
+      currentChunk.push(wt);
+      
+      const isSentenceEnd = /[.?!]$/.test(wt.word);
+      if (isSentenceEnd) {
+        sentencesInChunk++;
+      }
+      
+      // Create a new chunk every 3 sentences (or at the end of the text)
+      // This matches the user request "3 paragraf 3 paragraf" (3 sentences per screen)
+      if (sentencesInChunk >= 3 || wt.index === wordTimings.length - 1) {
+        // Find the start of the next chunk for a smooth transition
+        const nextWordStart = wt.index < wordTimings.length - 1 ? wordTimings[wt.index + 1].start : totalTime;
+        
+        result.push({
+          words: currentChunk,
+          start: currentChunk[0].start,
+          end: nextWordStart, // Keep visible until next chunk starts
+          id: `chunk-${result.length}`
+        });
+        currentChunk = [];
+        sentencesInChunk = 0;
+      }
+    });
+    return result;
+  }, [wordTimings, duration, estimatedSeconds]);
+
+  // Find the active chunk based on currentTime
+  const activeChunkIndex = subtitleChunks.findIndex(
+    chunk => currentTime >= chunk.start && currentTime <= chunk.end
+  );
+  const activeChunk = subtitleChunks[activeChunkIndex !== -1 ? activeChunkIndex : 0];
 
   useEffect(() => {
     return () => {
@@ -560,11 +678,33 @@ function StoryPlayer({ topic, onComplete, onNext }) {
       </div>
 
       {/* Right Column: Text & Next Button */}
-      <div className="w-full md:w-[40%] p-6 md:p-8 flex flex-col justify-between bg-white">
-        <div className="overflow-y-auto max-h-[40vh] md:max-h-[60vh] pr-4 custom-scrollbar">
-          <p className="font-sans text-slate-800 leading-relaxed text-[15px] md:text-[16px] text-justify whitespace-pre-wrap">
-            {topic.material.text}
-          </p>
+      <div className="w-full md:w-[40%] p-6 md:p-8 flex flex-col justify-between bg-white relative">
+        <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            {activeChunk && (
+              <motion.div
+                key={activeChunk.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="text-center w-full"
+              >
+                <div className="flex flex-wrap justify-center gap-x-2 gap-y-3">
+                  {activeChunk.words.map((wt, i) => {
+                    return (
+                      <span
+                        key={i}
+                        className="text-xl md:text-2xl lg:text-3xl font-bold px-1 rounded-lg text-[#315588]"
+                      >
+                        {wt.word}
+                      </span>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="flex justify-end pt-6 mt-4 border-t border-slate-100">
@@ -646,17 +786,17 @@ function VoiceAnswer({ topic, studentInfo, onFinish }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white rounded-[2rem] p-6 md:p-8 shadow-xl border border-slate-100 text-center max-w-2xl mx-auto"
+      className="bg-white rounded-[2rem] p-6 md:p-8 shadow-xl border border-slate-100 text-center max-w-2xl mx-auto relative overflow-visible"
     >
-      <div className={`inline-flex p-4 rounded-full ${topic.color} opacity-80 mb-6`}>
+      <div className={`inline-flex p-4 rounded-full ${topic.color} opacity-80 mb-6 relative z-10`}>
         <Mic className={`w-8 h-8 ${topic.textColor}`} />
       </div>
 
-      <h2 className="text-2xl font-bold text-slate-800 mb-2">Sekarang giliranmu!</h2>
-      <p className="text-slate-500 mb-8">{topic.material.question}</p>
+      <h2 className="text-2xl font-bold text-slate-800 mb-2 relative z-10">Sekarang giliranmu!</h2>
+      <p className="text-slate-500 mb-8 relative z-10">{topic.material.question}</p>
 
       {!audioUrl && (
-        <div className="flex flex-col items-center justify-center space-y-6 my-8">
+        <div className="flex flex-col items-center justify-center space-y-6 my-8 relative z-10">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -693,7 +833,7 @@ function VoiceAnswer({ topic, studentInfo, onFinish }) {
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="my-8 space-y-6"
+          className="my-8 space-y-6 relative z-10"
         >
           <div className="bg-slate-50 p-4 rounded-2xl">
             <audio src={audioUrl} controls className="w-full" />
@@ -718,6 +858,16 @@ function VoiceAnswer({ topic, studentInfo, onFinish }) {
           </div>
         </motion.div>
       )}
+
+      {/* Image positioned ON the card (overlapping) */}
+      <motion.img 
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        src={ceweAudio} 
+        alt="Audio Instructor" 
+        className="absolute right-0 bottom-0 w-[140px] md:w-[220px] object-contain drop-shadow-xl pointer-events-none z-0 hidden sm:block"
+      />
     </motion.div>
   );
 }
