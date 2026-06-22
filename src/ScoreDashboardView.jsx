@@ -74,37 +74,39 @@ export default function ScoreDashboardView({ onBack }) {
     >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 relative">
-          <button 
-            onClick={onBack}
-            className="p-2 md:p-3 rounded-full bg-[#315588] hover:bg-[#233f66] text-white shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-10"
-          >
-            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={3} />
-          </button>
+        <div className="flex flex-col items-center mb-6 w-full relative pt-2 md:pt-4">
+          {/* Back Button Container */}
+          <div className="w-full flex justify-start mb-4">
+            <button 
+              onClick={onBack}
+              className="p-2 md:p-3 rounded-full bg-[#315588] hover:bg-[#233f66] text-white shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+            >
+              <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={3} />
+            </button>
+          </div>
 
-          <div className="absolute left-0 right-0 flex flex-col items-center justify-center pointer-events-none">
+          {/* Title Container */}
+          <div className="flex flex-col items-center justify-center text-center w-full">
             <motion.div
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="flex items-center gap-3"
+              className="flex items-center justify-center gap-2 flex-wrap"
             >
-              <Trophy className="w-8 h-8 text-yellow-500" />
-              <h1 className="text-3xl md:text-5xl font-black text-[#315588] tracking-widest uppercase"
+              <Trophy className="w-6 h-6 md:w-8 md:h-8 text-yellow-500 shrink-0" />
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-[#315588] tracking-widest uppercase"
                   style={{ fontFamily: '"Kent", sans-serif' }}>
                 Klasemen Nilai
               </h1>
-              <Trophy className="w-8 h-8 text-yellow-500" />
+              <Trophy className="w-6 h-6 md:w-8 md:h-8 text-yellow-500 shrink-0" />
             </motion.div>
-            <p className="text-sm font-bold text-slate-500 mt-2 tracking-wider">
+            <p className="text-[10px] sm:text-xs md:text-sm font-bold text-slate-500 mt-2 tracking-wider">
               UPDATE LIVE - HASIL TEST SEBAB AKIBAT
             </p>
           </div>
-          
-          <div className="w-12 h-12" /> {/* Spacer for alignment */}
         </div>
 
         {/* Board */}
-        <div className="bg-white rounded-[2rem] shadow-xl border border-slate-100 p-2 md:p-6 overflow-hidden mt-16 md:mt-12">
+        <div className="bg-white rounded-[2rem] shadow-xl border border-slate-100 p-4 md:p-6 overflow-hidden mt-6 md:mt-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-[#315588] rounded-full animate-spin"></div>

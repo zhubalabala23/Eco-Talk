@@ -71,7 +71,7 @@ export default function ObjectivesView({ onNext, onBack }) {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full overflow-y-auto flex flex-col items-center justify-center p-4 md:p-8">
+    <div className="fixed inset-0 w-full h-full overflow-y-auto flex flex-col items-center justify-start p-4 md:p-8">
       {/* Background */}
       <div 
         className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
@@ -103,12 +103,12 @@ export default function ObjectivesView({ onNext, onBack }) {
         </motion.div>
       </div>
 
-      <div className="relative z-10 w-full max-w-[90rem] mx-auto flex flex-col justify-center min-h-full py-12">
+      <div className="relative z-10 w-full max-w-[90rem] mx-auto flex flex-col py-6 md:py-12 md:my-auto">
         {/* Header */}
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-center flex flex-col items-center mb-12 md:mb-16"
+          className="text-center flex flex-col items-center mb-6 md:mb-12"
         >
           <motion.h1 
             animate={{ scale: [1, 1.05, 1] }}
@@ -127,7 +127,7 @@ export default function ObjectivesView({ onNext, onBack }) {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-6 mt-8 md:mt-0 px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-6 mt-4 md:mt-0 px-4">
           {objectives.map((obj) => (
             <motion.div 
               key={obj.id}
