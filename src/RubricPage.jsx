@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, ChevronLeft, ClipboardCheck } from 'lucide-react';
 
-import bgGuide from './assets/images/background/background_guideview.png';
+import bgGuide from './assets/images/background/background_guideview.webp';
 
 const Cloud = ({ className }) => (
   <svg viewBox="0 0 100 50" className={className} xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>

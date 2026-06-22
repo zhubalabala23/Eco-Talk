@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, BookOpen, GraduationCap, Trophy } from 'lucide-react';
-import bgLanding from './assets/background_landingpage/background_landingpage.png';
-import imgPerahu from './assets/charachters_landing/perahu.png';
-import imgNaikSepeda from './assets/charachters_landing/naik_sepeda.png';
-import imgPriaSampah from './assets/charachters_landing/pria_membuang_sampah.png';
-import imgPriaMenanam from './assets/charachters_landing/pria_menanam.png';
-import imgWanitaSampah from './assets/charachters_landing/wanita_membuang_sampah.png';
-import imgWanitaMenanam from './assets/charachters_landing/wanita_menanam.png';
+import bgLanding from './assets/background_landingpage/background_landingpage.webp';
+import imgPerahu from './assets/charachters_landing/perahu.webp';
+import imgNaikSepeda from './assets/charachters_landing/naik_sepeda.webp';
+import imgPriaSampah from './assets/charachters_landing/pria_membuang_sampah.webp';
+import imgPriaMenanam from './assets/charachters_landing/pria_menanam.webp';
+import imgWanitaSampah from './assets/charachters_landing/wanita_membuang_sampah.webp';
+import imgWanitaMenanam from './assets/charachters_landing/wanita_menanam.webp';
 
 const Cloud = ({ className }) => (
   <svg viewBox="0 0 100 50" className={className} xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>

@@ -12,8 +12,11 @@ import ObjectivesView from './ObjectivesView';
 import GuideView from './GuideView';
 import ScoreDashboardView from './ScoreDashboardView';
 import { saveAssessment } from './db';
-import ceweAudio from './assets/images/cewe_audio.png';
-import bgGuide from './assets/images/background/background_guideview.png';
+import ceweAudio from './assets/images/cewe_audio.webp';
+import bgGuide from './assets/images/background/background_guideview.webp';
+import bgLanding from './assets/background_landingpage/background_landingpage.webp';
+import bgRegistration from './assets/background_registration/background_registration.webp';
+import bgObjectives from './assets/background_tujuan/background_tujuan_pembelajaran.webp';
 
 const iconMap = {
   Waves,
@@ -60,6 +63,15 @@ export default function App() {
       sessionStorage.removeItem('ecoTalkStudent');
     }
   }, [studentInfo]);
+
+  useEffect(() => {
+    // Preload heavy background WebP images to make view transitions instant
+    const backgrounds = [bgLanding, bgRegistration, bgObjectives, bgGuide];
+    backgrounds.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
 
   useEffect(() => {
     sessionStorage.setItem('ecoTalkView', view);

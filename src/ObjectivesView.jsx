@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, Link as LinkIcon, Edit3, Mic, ChevronLeft } from 'lucide-react';
-import bgObjectives from './assets/background_tujuan/background_tujuan_pembelajaran.png';
+import bgObjectives from './assets/background_tujuan/background_tujuan_pembelajaran.webp';
 
 // Characters
-import char1 from './assets/background_tujuan/karakter_pria.png';
-import char2 from './assets/background_tujuan/karakter_wanita.png';
-import char3 from './assets/background_tujuan/karakter_pria1.png';
-import char4 from './assets/background_tujuan/karakter_wanita2.png';
+import char1 from './assets/background_tujuan/karakter_pria.webp';
+import char2 from './assets/background_tujuan/karakter_wanita.webp';
+import char3 from './assets/background_tujuan/karakter_pria1.webp';
+import char4 from './assets/background_tujuan/karakter_wanita2.webp';
 
 const Cloud = ({ className }) => (
   <svg viewBox="0 0 100 50" className={className} xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>

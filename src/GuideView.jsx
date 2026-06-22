@@ -2,12 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronRight } from 'lucide-react';
 
-import step1Img from './assets/images/charachters/pilih_topik.png';
-import step2Img from './assets/images/charachters/pelajari_materi.png';
-import step3Img from './assets/images/charachters/rekam_suara.png';
-import step4Img from './assets/images/charachters/kirim_rekaman.png';
-import step5Img from './assets/images/charachters/guru_menilai.png';
-import bgGuide from './assets/images/background/background_guideview.png';
+import step1Img from './assets/images/charachters/pilih_topik.webp';
+import step2Img from './assets/images/charachters/pelajari_materi.webp';
+import step3Img from './assets/images/charachters/rekam_suara.webp';
+import step4Img from './assets/images/charachters/kirim_rekaman.webp';
+import step5Img from './assets/images/charachters/guru_menilai.webp';
+import bgGuide from './assets/images/background/background_guideview.webp';
 
 const LeafDecoration = () => (
   <svg width="40" height="40" viewBox="0 0 40 40" className="absolute -right-10 -top-2" style={{ transform: 'rotate(15deg)' }}>
