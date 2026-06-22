@@ -11,21 +11,27 @@ export default function RegistrationView({ onComplete, onBack }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (name && absen) {
-      setIsLoading(true);
-      try {
-        const studentData = {
-          name,
-          absen,
-        };
-        const savedStudent = await saveStudent(studentData);
-        onComplete(savedStudent);
-      } catch (error) {
-        console.error("Firebase Error:", error);
-        alert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
+    const trimmedName = name.trim();
+    const trimmedAbsen = String(absen).trim();
+    
+    if (!trimmedName || !trimmedAbsen) {
+      alert("Nama dan Nomor Absen tidak boleh kosong atau hanya berupa spasi!");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const studentData = {
+        name: trimmedName,
+        absen: trimmedAbsen,
+      };
+      const savedStudent = await saveStudent(studentData);
+      onComplete(savedStudent);
+    } catch (error) {
+      console.error("Firebase Error:", error);
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 

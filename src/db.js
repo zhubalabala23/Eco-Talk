@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, doc, setDoc, getDocs, query, where, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
 // Helper to convert Audio Blob to Base64 to store in Firestore
 const blobToBase64 = (blob) => {
@@ -25,9 +25,11 @@ const base64ToBlob = (base64, mimeType = 'audio/webm') => {
 
 export const saveStudent = async (studentData) => {
   const studentsRef = collection(db, 'students');
+  const trimmedName = studentData.name.trim();
+  const trimmedAbsen = String(studentData.absen).trim();
   
   // 1. Cek apakah Nama tersebut sudah ada di database
-  const nameQuery = query(studentsRef, where("name", "==", studentData.name));
+  const nameQuery = query(studentsRef, where("name", "==", trimmedName));
   const nameSnapshot = await getDocs(nameQuery);
   
   if (!nameSnapshot.empty) {
@@ -35,32 +37,50 @@ export const saveStudent = async (studentData) => {
     const existingData = existingDoc.data();
     
     // Jika namanya ada, cek apakah nomor absennya SAMA
-    if (existingData.absen === studentData.absen) {
+    if (existingData.absen === trimmedAbsen) {
       // Cocok! Login berhasil.
       return { id: existingDoc.id, ...existingData };
     } else {
       // Namanya ada, tapi absennya BEDA. Tolak.
-      throw new Error(`Maaf, nama "${studentData.name}" sudah dipakai oleh siswa lain. Jika ini adalah kamu, pastikan Nomor Absen yang dimasukkan benar. Jika bukan, silakan tambahkan nama belakangmu agar tidak duplikat.`);
+      throw new Error(`Maaf, nama "${trimmedName}" sudah dipakai oleh siswa lain. Jika ini adalah kamu, pastikan Nomor Absen yang dimasukkan benar. Jika bukan, silakan tambahkan nama belakangmu agar tidak duplikat.`);
     }
   }
 
-  // 2. (Opsional) Cek apakah Nomor Absen tersebut sudah dipakai orang lain
-  const absenQuery = query(studentsRef, where("absen", "==", studentData.absen));
+  // 2. Cek apakah Nomor Absen tersebut sudah dipakai orang lain
+  const absenQuery = query(studentsRef, where("absen", "==", trimmedAbsen));
   const absenSnapshot = await getDocs(absenQuery);
   
   if (!absenSnapshot.empty) {
     const existingData = absenSnapshot.docs[0].data();
-    throw new Error(`Nomor Absen "${studentData.absen}" sudah dipakai oleh ${existingData.name}!`);
+    throw new Error(`Nomor Absen "${trimmedAbsen}" sudah dipakai oleh ${existingData.name}!`);
   }
 
   // 3. Jika nama & absen benar-benar baru, buat data baru
   const newStudentRef = doc(collection(db, 'students'));
-  const newStudent = { ...studentData, id: newStudentRef.id };
+  const newStudent = { 
+    id: newStudentRef.id,
+    name: trimmedName,
+    absen: trimmedAbsen
+  };
   await setDoc(newStudentRef, newStudent);
   return newStudent;
 };
 
 export const saveAssessment = async (assessment) => {
+  const assessmentsRef = collection(db, 'assessments');
+  
+  if (assessment.studentId && assessment.studentId !== 'anonymous') {
+    const q = query(
+      assessmentsRef,
+      where("studentId", "==", assessment.studentId),
+      where("topicId", "==", assessment.topicId)
+    );
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      throw new Error("Kamu sudah mengirimkan rekaman untuk materi ini. Jika ingin mengulang, silakan minta gurumu untuk menghapusnya terlebih dahulu.");
+    }
+  }
+
   let base64Audio = null;
   if (assessment.audioBlob) {
     base64Audio = await blobToBase64(assessment.audioBlob);
@@ -72,7 +92,6 @@ export const saveAssessment = async (assessment) => {
     audioBase64: base64Audio
   };
 
-  const assessmentsRef = collection(db, 'assessments');
   const docRef = await addDoc(assessmentsRef, assessmentData);
   return docRef.id;
 };
@@ -113,8 +132,33 @@ export const deleteAssessment = async (id) => {
   await deleteDoc(docRef);
 };
 
+export const getStudentAssessments = async (studentId) => {
+  if (!studentId) return [];
+  const assessmentsRef = collection(db, 'assessments');
+  const q = query(assessmentsRef, where("studentId", "==", studentId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(docSnapshot => {
+    const data = docSnapshot.data();
+    return {
+      ...data,
+      id: docSnapshot.id,
+      audioBlob: data.audioBase64 ? base64ToBlob(data.audioBase64) : null
+    };
+  });
+};
+
 export const updateStudentProgress = async (studentId, progress) => {
   if (!studentId) return;
   const studentRef = doc(db, 'students', studentId);
   await updateDoc(studentRef, { progress });
+};
+
+export const getStudent = async (studentId) => {
+  if (!studentId) return null;
+  const studentRef = doc(db, 'students', studentId);
+  const docSnap = await getDoc(studentRef);
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+  return null;
 };

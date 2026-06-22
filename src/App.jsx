@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Waves, Trash2, Factory, TreePine, Droplets, Play, Pause, RotateCcw, Mic, Square, Check, Home, ChevronLeft, Volume2, ArrowRight, ClipboardList, LogOut, Menu, BookOpen, Trophy } from 'lucide-react';
+import { Waves, Trash2, Factory, TreePine, Droplets, Play, Pause, RotateCcw, Mic, Square, Check, Home, ChevronLeft, Volume2, ArrowRight, ClipboardList, LogOut, Menu, BookOpen, Trophy, Lock } from 'lucide-react';
 import { topics } from './data';
 import LandingPage from './LandingPage';
 import RegistrationView from './RegistrationView';
@@ -11,7 +11,7 @@ import RubricPage from './RubricPage';
 import ObjectivesView from './ObjectivesView';
 import GuideView from './GuideView';
 import ScoreDashboardView from './ScoreDashboardView';
-import { saveAssessment } from './db';
+import { saveAssessment, getStudentAssessments, updateStudentProgress, getStudent } from './db';
 import ceweAudio from './assets/images/cewe_audio.webp';
 import bgGuide from './assets/images/background/background_guideview.webp';
 import bgLanding from './assets/background_landingpage/background_landingpage.webp';
@@ -56,9 +56,63 @@ export default function App() {
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const refreshStudentProgress = async (studentId) => {
+    if (!studentId) return;
+    try {
+      const studentData = await getStudent(studentId);
+      const studentProgress = studentData?.progress || {};
+
+      const studentAssessments = await getStudentAssessments(studentId);
+      const dbProgressMap = {};
+      studentAssessments.forEach(a => {
+        if (a.topicId) {
+          dbProgressMap[a.topicId] = true;
+        }
+      });
+
+      setProgress(prev => {
+        const merged = {};
+        
+        // 1. Populate with persistent progress from Firestore student document
+        Object.keys(studentProgress).forEach(topicId => {
+          merged[topicId] = {
+            listened: studentProgress[topicId]?.listened || false,
+            answered: studentProgress[topicId]?.answered || false
+          };
+        });
+
+        // 2. Merge current local prev progress
+        Object.keys(prev).forEach(topicId => {
+          merged[topicId] = {
+            listened: merged[topicId]?.listened || prev[topicId]?.listened || false,
+            answered: merged[topicId]?.answered || prev[topicId]?.answered || false
+          };
+        });
+
+        // 3. Ensure answered flags from DB are always correct (if in DB, answered is true)
+        Object.keys(dbProgressMap).forEach(topicId => {
+          if (!merged[topicId]) {
+            merged[topicId] = {
+              listened: false,
+              answered: true
+            };
+          } else {
+            merged[topicId].answered = true;
+          }
+        });
+
+        sessionStorage.setItem('ecoTalkProgress', JSON.stringify(merged));
+        return merged;
+      });
+    } catch (err) {
+      console.error("Error refreshing student progress:", err);
+    }
+  };
+
   useEffect(() => {
     if (studentInfo) {
       sessionStorage.setItem('ecoTalkStudent', JSON.stringify(studentInfo));
+      refreshStudentProgress(studentInfo.id);
     } else {
       sessionStorage.removeItem('ecoTalkStudent');
     }
@@ -89,6 +143,11 @@ export default function App() {
     if (topic) setSelectedTopic(topic);
     setView(newView);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Refresh student progress from DB when going back to home
+    if (newView === 'home' && studentInfo?.id) {
+      refreshStudentProgress(studentInfo.id);
+    }
   };
 
   const handleLogout = () => {
@@ -115,6 +174,14 @@ export default function App() {
         }
       };
       sessionStorage.setItem('ecoTalkProgress', JSON.stringify(nextProgress));
+      
+      // Persist to Firestore student document
+      if (studentInfo?.id) {
+        updateStudentProgress(studentInfo.id, nextProgress).catch(err => {
+          console.error("Failed to sync progress to Firestore:", err);
+        });
+      }
+      
       return nextProgress;
     });
   };
@@ -346,7 +413,6 @@ export default function App() {
                 markProgress(selectedTopic.id, 'listened');
               }}
               onNext={() => {
-                markProgress(selectedTopic.id, 'listened');
                 navigateTo('answer');
               }}
             />
@@ -356,10 +422,12 @@ export default function App() {
               key="answer" 
               topic={selectedTopic} 
               studentInfo={studentInfo}
+              hasSubmitted={!!progress[selectedTopic.id]?.answered}
               onFinish={() => {
                 markProgress(selectedTopic.id, 'answered');
                 navigateTo('closing');
               }} 
+              onHome={() => navigateTo('home')}
             />
           )}
           {view === 'closing' && (
@@ -424,12 +492,10 @@ function HomeView({ onSelect, progress, studentInfo, onScoreDashboard }) {
                       {topicProgress.listened ? <Check className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
                       Materi
                     </div>
-                    {topicProgress.listened && (
-                      <div className={`text-[10px] px-2 py-1 rounded-full flex items-center gap-1 ${topicProgress.answered ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'}`}>
-                        {topicProgress.answered ? <Check className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
-                        Suara
-                      </div>
-                    )}
+                    <div className={`text-[10px] px-2 py-1 rounded-full flex items-center gap-1 ${topicProgress.answered ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'}`}>
+                      {topicProgress.answered ? <Check className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
+                      Suara
+                    </div>
                   </div>
                 </div>
               </div>
@@ -823,10 +889,11 @@ function StoryPlayer({ topic, onComplete, onNext }) {
 }
 
 // 3. Voice Answer / Reflection Mode
-function VoiceAnswer({ topic, studentInfo, onFinish }) {
+function VoiceAnswer({ topic, studentInfo, onFinish, onHome, hasSubmitted }) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
 
@@ -868,18 +935,61 @@ function VoiceAnswer({ topic, studentInfo, onFinish }) {
   };
 
   const handleFinish = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     if (audioBlob) {
-      await saveAssessment({
-        studentId: studentInfo ? studentInfo.id : 'anonymous',
-        topicId: topic.id,
-        audioBlob,
-        timestamp: Date.now(),
-        score: null,
-        graded: false
-      });
+      try {
+        await saveAssessment({
+          studentId: studentInfo ? studentInfo.id : 'anonymous',
+          topicId: topic.id,
+          audioBlob,
+          timestamp: Date.now(),
+          score: null,
+          graded: false
+        });
+      } catch (err) {
+        console.error(err);
+        alert(err.message || "Gagal menyimpan rekaman. Silakan coba lagi.");
+        setIsSaving(false);
+        return;
+      }
     }
     onFinish();
   };
+
+  if (hasSubmitted) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white rounded-[2rem] p-6 md:p-8 shadow-xl border border-slate-100 text-center max-w-2xl mx-auto relative overflow-visible"
+      >
+        <div className={`inline-flex p-4 rounded-full bg-yellow-100 mb-6 relative z-10`}>
+          <Lock className={`w-8 h-8 text-yellow-600`} />
+        </div>
+
+        <h2 className="text-2xl font-bold text-slate-800 mb-2 relative z-10">Sudah Terisi! 🌟</h2>
+        <p className="text-slate-600 mb-6 relative z-10 leading-relaxed">
+          Kamu sudah mengumpulkan rekaman suara untuk topik <strong>{topic.title}</strong>.
+        </p>
+        
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8 text-left text-amber-800 text-sm">
+          <p className="font-semibold mb-1">Suara sudah terisi!</p>
+          Minta Bapak/Ibu Guru untuk menghapus data penilaian lamamu terlebih dahulu di halaman guru. Setelah dihapus, kamu bisa merekam kembali jawaban terbaikmu di sini!
+        </div>
+
+        <div className="flex justify-center gap-4 relative z-10">
+          <button 
+            onClick={onHome}
+            className={`px-8 py-3 rounded-full text-slate-800 font-bold shadow-md hover:-translate-y-0.5 transition-transform ${topic.color} ${topic.shadow}`}
+          >
+            Kembali ke Menu Utama
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div 
@@ -941,19 +1051,21 @@ function VoiceAnswer({ topic, studentInfo, onFinish }) {
           
           <div className="flex justify-center gap-4">
             <button 
+              disabled={isSaving}
               onClick={() => {
                 setAudioUrl(null);
                 setAudioBlob(null);
               }}
-              className="px-6 py-3 rounded-full text-slate-500 font-medium hover:bg-slate-100 transition-colors"
+              className="px-6 py-3 rounded-full text-slate-500 font-medium hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Rekam ulang
             </button>
             <button 
               onClick={handleFinish}
-              className={`px-8 py-3 rounded-full text-slate-800 font-bold shadow-md hover:-translate-y-0.5 transition-transform ${topic.color} ${topic.shadow}`}
+              disabled={isSaving}
+              className={`px-8 py-3 rounded-full text-slate-800 font-bold shadow-md hover:-translate-y-0.5 transition-transform ${topic.color} ${topic.shadow} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Simpan & Selesai ✨
+              {isSaving ? 'Menyimpan...' : 'Simpan & Selesai ✨'}
             </button>
           </div>
         </motion.div>
