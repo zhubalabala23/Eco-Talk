@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Waves, Trash2, Factory, TreePine, Droplets, Play, Pause, RotateCcw, Mic, Square, Check, Home, ChevronLeft, Volume2, ArrowRight, ClipboardList, LogOut, Menu } from 'lucide-react';
+import { Waves, Trash2, Factory, TreePine, Droplets, Play, Pause, RotateCcw, Mic, Square, Check, Home, ChevronLeft, Volume2, ArrowRight, ClipboardList, LogOut, Menu, BookOpen, Trophy } from 'lucide-react';
 import { topics } from './data';
 import LandingPage from './LandingPage';
 import RegistrationView from './RegistrationView';
 import ClosingView from './ClosingView';
 import TeacherView from './TeacherView';
+import TeacherLoginView from './TeacherLoginView';
 import RubricPage from './RubricPage';
+import ObjectivesView from './ObjectivesView';
+import GuideView from './GuideView';
+import ScoreDashboardView from './ScoreDashboardView';
 import { saveAssessment } from './db';
 import ceweAudio from './assets/images/cewe_audio.png';
+import bgGuide from './assets/images/background/background_guideview.png';
 
 const iconMap = {
   Waves,
@@ -21,44 +26,50 @@ const iconMap = {
 // Main App Component
 export default function App() {
   const [studentInfo, setStudentInfo] = useState(() => {
-    const saved = localStorage.getItem('ecoTalkStudent');
+    const saved = sessionStorage.getItem('ecoTalkStudent');
     return saved ? JSON.parse(saved) : null;
   });
   const [view, setView] = useState(() => {
-    const savedStudent = localStorage.getItem('ecoTalkStudent');
-    const savedView = localStorage.getItem('ecoTalkView');
-    if (savedStudent && savedView && savedView !== 'landing' && savedView !== 'register') {
+    const savedStudent = sessionStorage.getItem('ecoTalkStudent');
+    const savedView = sessionStorage.getItem('ecoTalkView');
+    
+    // Always respect these views even if student is logged in
+    if (savedView === 'landing' || savedView === 'teacher-login' || savedView === 'teacher' || savedView === 'dashboard') {
+      return savedView;
+    }
+    
+    if (savedStudent && savedView && savedView !== 'register') {
       return savedView;
     }
     return savedStudent ? 'home' : 'landing';
   });
   const [selectedTopic, setSelectedTopic] = useState(() => {
-    const saved = localStorage.getItem('ecoTalkTopic');
+    const saved = sessionStorage.getItem('ecoTalkTopic');
     return saved ? JSON.parse(saved) : null;
   });
   const [progress, setProgress] = useState(() => {
-    const saved = localStorage.getItem('ecoTalkProgress');
+    const saved = sessionStorage.getItem('ecoTalkProgress');
     return saved ? JSON.parse(saved) : {};
   });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (studentInfo) {
-      localStorage.setItem('ecoTalkStudent', JSON.stringify(studentInfo));
+      sessionStorage.setItem('ecoTalkStudent', JSON.stringify(studentInfo));
     } else {
-      localStorage.removeItem('ecoTalkStudent');
+      sessionStorage.removeItem('ecoTalkStudent');
     }
   }, [studentInfo]);
 
   useEffect(() => {
-    localStorage.setItem('ecoTalkView', view);
+    sessionStorage.setItem('ecoTalkView', view);
   }, [view]);
 
   useEffect(() => {
     if (selectedTopic) {
-      localStorage.setItem('ecoTalkTopic', JSON.stringify(selectedTopic));
+      sessionStorage.setItem('ecoTalkTopic', JSON.stringify(selectedTopic));
     } else {
-      localStorage.removeItem('ecoTalkTopic');
+      sessionStorage.removeItem('ecoTalkTopic');
     }
   }, [selectedTopic]);
 
@@ -71,10 +82,10 @@ export default function App() {
   const handleLogout = () => {
     const confirmLogout = window.confirm("Apakah Anda yakin ingin keluar?");
     if (confirmLogout) {
-      localStorage.removeItem('ecoTalkProgress');
-      localStorage.removeItem('ecoTalkStudent');
-      localStorage.removeItem('ecoTalkView');
-      localStorage.removeItem('ecoTalkTopic');
+      sessionStorage.removeItem('ecoTalkProgress');
+      sessionStorage.removeItem('ecoTalkStudent');
+      sessionStorage.removeItem('ecoTalkView');
+      sessionStorage.removeItem('ecoTalkTopic');
       setProgress({});
       setStudentInfo(null);
       setSelectedTopic(null);
@@ -91,11 +102,21 @@ export default function App() {
           [type]: true
         }
       };
-      localStorage.setItem('ecoTalkProgress', JSON.stringify(nextProgress));
+      sessionStorage.setItem('ecoTalkProgress', JSON.stringify(nextProgress));
       return nextProgress;
     });
   };
 
+
+  // If in Teacher Login View
+  if (view === 'teacher-login') {
+    return (
+      <TeacherLoginView 
+        onLogin={() => navigateTo('teacher')} 
+        onBack={() => navigateTo('landing')} 
+      />
+    );
+  }
 
   // If in Teacher View, don't show the regular app shell
   if (view === 'teacher') {
@@ -106,36 +127,60 @@ export default function App() {
     );
   }
 
+  // If in Dashboard View, don't show the regular app shell
+  if (view === 'dashboard') {
+    return (
+      <ScoreDashboardView onBack={() => navigateTo(studentInfo ? 'home' : 'landing')} />
+    );
+  }
+
   return (
     <AnimatePresence mode="wait">
       {view === 'landing' ? (
-        <LandingPage key="landing" onStart={() => navigateTo('register')} />
+        <LandingPage 
+          key="landing" 
+          onStudentStart={() => navigateTo('register')} 
+          onTeacherStart={() => navigateTo('teacher-login')} 
+          onScoreDashboard={() => navigateTo('dashboard')}
+        />
       ) : (
         <motion.div 
           key="main-app"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="min-h-screen pb-12 bg-[#e0f2fe]"
+          className="min-h-screen pb-12 relative overflow-hidden"
         >
+          {/* Background Image reused from Guide */}
+          <div 
+            className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
+            style={{ backgroundImage: `url(${bgGuide})`, zIndex: 0 }}
+          />
+
           {/* Header */}
           <header className="py-6 px-4 md:px-8 flex items-center justify-center relative z-20">
-            {view !== 'register' && view !== 'closing' && view !== 'rubric' && (
+            {view !== 'register' && view !== 'closing' && view !== 'rubric' && view !== 'objectives' && view !== 'landing' && view !== 'guide' && (
               <button 
                 onClick={() => {
                   if (view === 'answer') {
                     navigateTo('story', selectedTopic);
                   } else if (view === 'story') {
+                    navigateTo('rubric');
+                  } else if (view === 'rubric') {
                     navigateTo('home');
                   } else if (view === 'home') {
-                    navigateTo('rubric');
+                    navigateTo('guide');
+                  } else if (view === 'guide') {
+                    navigateTo('landing');
+                  } else if (view === 'objectives') {
+                    navigateTo('home');
                   } else {
                     navigateTo('landing');
                   }
                 }}
-                className="absolute left-4 md:left-8 p-2 rounded-full hover:bg-slate-200/50 transition-colors"
+                className="absolute left-4 md:left-8 p-2 md:p-3 rounded-full bg-[#315588] hover:bg-[#233f66] text-white shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-50"
               >
-                <ChevronLeft className="w-6 h-6 text-slate-500" />
+                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 text-white" strokeWidth={3} />
               </button>
             )}
             
@@ -144,7 +189,7 @@ export default function App() {
                 onClick={() => {
                   navigateTo('home');
                 }}
-                className="absolute right-4 md:right-8 p-2 rounded-full hover:bg-slate-200/50 transition-colors"
+                className="absolute right-4 md:right-8 p-2 rounded-full bg-white shadow-sm hover:bg-slate-50 transition-colors z-50"
               >
                 <Home className="w-6 h-6 text-slate-500" />
               </button>
@@ -155,7 +200,7 @@ export default function App() {
                 {/* Mobile Menu Button */}
                 <button 
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="md:hidden p-2 rounded-full hover:bg-slate-200/50 transition-colors"
+                  className="md:hidden p-2 rounded-full bg-white shadow-sm hover:bg-slate-50 transition-colors"
                 >
                   <Menu className="w-6 h-6 text-slate-500" />
                 </button>
@@ -164,11 +209,18 @@ export default function App() {
                 {isMenuOpen && (
                   <div className="absolute top-12 right-0 bg-white shadow-xl border border-slate-100 rounded-xl p-2 flex flex-col gap-1 md:hidden">
                     <button 
-                      onClick={() => { navigateTo('teacher'); setIsMenuOpen(false); }}
-                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-[#315588] hover:bg-blue-50 rounded-lg whitespace-nowrap"
+                      onClick={() => { navigateTo('dashboard'); setIsMenuOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-yellow-600 hover:bg-yellow-50 rounded-lg whitespace-nowrap"
                     >
-                      <ClipboardList className="w-4 h-4" />
-                      Penilaian
+                      <Trophy className="w-4 h-4" />
+                      Klasemen
+                    </button>
+                    <button 
+                      onClick={() => { navigateTo('objectives'); setIsMenuOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg whitespace-nowrap"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Tujuan Pembelajaran
                     </button>
                     <button 
                       onClick={() => { handleLogout(); setIsMenuOpen(false); }}
@@ -183,15 +235,22 @@ export default function App() {
                 {/* Desktop Buttons */}
                 <div className="hidden md:flex items-center gap-2">
                   <button 
-                    onClick={() => navigateTo('teacher')}
-                    className="p-2 rounded-full hover:bg-slate-200/50 transition-colors flex flex-col items-center group relative"
+                    onClick={() => navigateTo('dashboard')}
+                    className="p-2 rounded-full bg-white shadow-sm hover:bg-yellow-50 transition-colors flex flex-col items-center group relative"
                   >
-                    <ClipboardList className="w-6 h-6 text-[#315588]" />
-                    <span className="text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Penilaian</span>
+                    <Trophy className="w-6 h-6 text-yellow-500" />
+                    <span className="text-[10px] text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Klasemen</span>
+                  </button>
+                  <button 
+                    onClick={() => navigateTo('objectives')}
+                    className="p-2 rounded-full bg-white shadow-sm hover:bg-green-50 transition-colors flex flex-col items-center group relative"
+                  >
+                    <BookOpen className="w-6 h-6 text-green-500" />
+                    <span className="text-[10px] text-green-600 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Tujuan Pembelajaran</span>
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className="p-2 rounded-full hover:bg-red-50 transition-colors flex flex-col items-center group relative"
+                    className="p-2 rounded-full bg-white shadow-sm hover:bg-red-50 transition-colors flex flex-col items-center group relative"
                   >
                     <LogOut className="w-6 h-6 text-red-500" />
                     <span className="text-[10px] text-red-500 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 whitespace-nowrap">Keluar</span>
@@ -200,13 +259,15 @@ export default function App() {
               </div>
             )}
 
-        {view !== 'rubric' && (
+        {view !== 'rubric' && view !== 'guide' && view !== 'objectives' && (
           <motion.div 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="text-center flex flex-col items-center"
           >
-            <h1 
+            <motion.h1 
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               className="text-5xl md:text-7xl tracking-widest mb-2 uppercase"
               style={{ 
                 fontFamily: '"Kent", sans-serif',
@@ -215,7 +276,7 @@ export default function App() {
                 paintOrder: "stroke fill"
               }} >
               Eco Talk
-            </h1>
+            </motion.h1>
             <p className="text-[10px] md:text-xs font-bold text-slate-500 tracking-wider">
               MENCARI SEBAB AKIBAT DENGAN ALAM...
             </p>
@@ -230,22 +291,39 @@ export default function App() {
               key="register" 
               onComplete={(student) => {
                 setStudentInfo(student);
-                navigateTo('rubric');
-              }} 
+                navigateTo('guide');
+              }}
+              onBack={() => navigateTo('landing')}
+            />
+          )}
+          {view === 'guide' && (
+            <GuideView
+              key="guide"
+              onNext={() => navigateTo('home')}
+            />
+          )}
+          {view === 'objectives' && (
+            <ObjectivesView
+              key="objectives"
+              onNext={() => navigateTo('home')}
+              onBack={() => navigateTo('home')}
             />
           )}
           {view === 'rubric' && (
             <RubricPage
               key="rubric"
-              onNext={() => navigateTo('home')}
+              onNext={() => navigateTo('story', selectedTopic)}
+              onBack={() => navigateTo('home')}
             />
           )}
+
           {view === 'home' && (
             <HomeView 
               key="home" 
               studentInfo={studentInfo}
               progress={progress} 
-              onSelect={(topic) => navigateTo('story', topic)} 
+              onSelect={(topic) => navigateTo('rubric', topic)} 
+              onScoreDashboard={() => navigateTo('dashboard')}
             />
           )}
           {view === 'story' && selectedTopic && (
@@ -289,7 +367,7 @@ export default function App() {
 }
 
 // 1. Home View / Material Picker
-function HomeView({ onSelect, progress, studentInfo }) {
+function HomeView({ onSelect, progress, studentInfo, onScoreDashboard }) {
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
@@ -297,11 +375,13 @@ function HomeView({ onSelect, progress, studentInfo }) {
       exit={{ opacity: 0, x: 20 }}
       className="space-y-6 max-w-4xl mx-auto"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-xl font-medium text-slate-600">
+      <div className="text-center mb-8 flex flex-col items-center">
+        <h2 className="text-xl font-medium text-slate-700 mb-2">
           Siap belajar, <span className="font-bold text-[#315588]">{studentInfo?.name || 'Sobat Bumi'}</span>?
         </h2>
-        <p className="text-sm text-slate-400 mt-1">Pilih topik ajaib untuk memulai petualanganmu.</p>
+        <div className="inline-block bg-white/90 backdrop-blur-sm px-5 py-2 rounded-full shadow-sm border border-slate-100">
+          <p className="text-sm text-slate-600 font-semibold">Pilih topik ajaib untuk memulai petualanganmu.</p>
+        </div>
       </div>
       
       <div className="grid gap-4 md:grid-cols-2">
@@ -367,34 +447,43 @@ function StoryPlayer({ topic, onComplete, onNext }) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
   
-  const words = topic.material.text.split(/\s+/).filter(w => w.length > 0);
+  const paragraphs = topic.material.text.split('\n').filter(p => p.trim().length > 0);
+  const words = paragraphs.flatMap(p => p.split(/\s+/).filter(w => w.length > 0));
   const estimatedSeconds = Math.max((words.length / 2.5), 5); // Rough estimate of 2.5 words per second
 
   // Calculate timing for each word based on total duration using Natural Speech Pacing
   const wordTimings = React.useMemo(() => {
     const totalTime = duration || estimatedSeconds;
-    if (!totalTime || !words.length) return [];
+    if (!totalTime || !paragraphs.length) return [];
     
     // Calculate weights to simulate natural human dictation speed and intonation
-    const wordsWithData = words.map(word => {
-      // Clean word to get actual character length
-      const textLength = word.replace(/[^a-zA-Z0-9]/g, '').length;
-      const weight = Math.max(textLength, 2); 
-      
-      // Determine pauses after the word based on punctuation
-      let pauseAfter = 0;
-      if (word.endsWith(',')) {
-        pauseAfter = 5; // Jeda untuk koma
-      } else if (/[.?!]$/.test(word)) {
-        pauseAfter = 12; // Jeda lebih panjang untuk akhir kalimat (titik)
-      }
-      
-      return { word, weight, pauseAfter };
+    const wordsWithData = [];
+    paragraphs.forEach((p, pIdx) => {
+      const pWords = p.split(/\s+/).filter(w => w.length > 0);
+      pWords.forEach((word, wIdx) => {
+        const isLastWordInParagraph = wIdx === pWords.length - 1;
+        
+        // Clean word to get actual character length
+        const textLength = word.replace(/[^a-zA-Z0-9]/g, '').length;
+        const weight = Math.max(textLength, 2); 
+        
+        // Determine pauses after the word based on punctuation
+        let pauseAfter = 0;
+        if (isLastWordInParagraph) {
+          pauseAfter = 30; // Jeda panjang untuk akhir paragraf
+        } else if (word.endsWith(',')) {
+          pauseAfter = 5; // Jeda untuk koma
+        } else if (/[.?!]$/.test(word)) {
+          pauseAfter = 12; // Jeda normal untuk akhir kalimat (titik)
+        }
+        
+        wordsWithData.push({ word, weight, pauseAfter, isLastWordInParagraph });
+      });
     });
     
     const totalWeight = wordsWithData.reduce((acc, curr) => acc + curr.weight + curr.pauseAfter, 0);
     
-    // Provide a small buffer for video intro/outro (e.g., logo, music)
+    // Provide a buffer for video intro/outro (e.g., logo, music)
     const introDelay = totalTime > 15 ? 1.0 : (totalTime > 5 ? 0.5 : 0);
     const outroDelay = totalTime > 15 ? 1.5 : 0;
     const activeTime = Math.max(totalTime - introDelay - outroDelay, 5);
@@ -411,6 +500,7 @@ function StoryPlayer({ topic, onComplete, onNext }) {
         start: currentT,
         end: currentT + speakDuration, // Exact time word is spoken
         chunkEnd: currentT + speakDuration + pauseDuration,
+        isLastWordInParagraph: data.isLastWordInParagraph,
         index
       });
       
@@ -420,36 +510,28 @@ function StoryPlayer({ topic, onComplete, onNext }) {
     return timings;
   }, [duration, words, estimatedSeconds]);
 
-  // Group words into subtitle chunks (3 sentences per chunk)
+  // Group words into subtitle chunks by paragraph
   const subtitleChunks = React.useMemo(() => {
     if (!wordTimings.length) return [];
     const totalTime = duration || estimatedSeconds;
     const result = [];
     let currentChunk = [];
-    let sentencesInChunk = 0;
     
     wordTimings.forEach((wt) => {
       currentChunk.push(wt);
       
-      const isSentenceEnd = /[.?!]$/.test(wt.word);
-      if (isSentenceEnd) {
-        sentencesInChunk++;
-      }
-      
-      // Create a new chunk every 3 sentences (or at the end of the text)
-      // This matches the user request "3 paragraf 3 paragraf" (3 sentences per screen)
-      if (sentencesInChunk >= 3 || wt.index === wordTimings.length - 1) {
+      // Create a new chunk at the end of each paragraph
+      if (wt.isLastWordInParagraph || wt.index === wordTimings.length - 1) {
         // Find the start of the next chunk for a smooth transition
         const nextWordStart = wt.index < wordTimings.length - 1 ? wordTimings[wt.index + 1].start : totalTime;
         
         result.push({
           words: currentChunk,
           start: currentChunk[0].start,
-          end: nextWordStart, // Keep visible until next chunk starts
+          end: Math.max(currentChunk[0].start + 0.5, nextWordStart - 0.3), // Beri jeda kosong 0.3 detik sebelum paragraf baru muncul
           id: `chunk-${result.length}`
         });
         currentChunk = [];
-        sentencesInChunk = 0;
       }
     });
     return result;
@@ -459,7 +541,7 @@ function StoryPlayer({ topic, onComplete, onNext }) {
   const activeChunkIndex = subtitleChunks.findIndex(
     chunk => currentTime >= chunk.start && currentTime <= chunk.end
   );
-  const activeChunk = subtitleChunks[activeChunkIndex !== -1 ? activeChunkIndex : 0];
+  const activeChunk = activeChunkIndex !== -1 ? subtitleChunks[activeChunkIndex] : (currentTime < (subtitleChunks[0]?.start || 0) ? subtitleChunks[0] : null);
 
   useEffect(() => {
     return () => {
@@ -475,6 +557,7 @@ function StoryPlayer({ topic, onComplete, onNext }) {
     let lastPauseStart = 0;
 
     const animateProgress = (timestamp) => {
+      if (topic.material.videoUrl || topic.material.localVideo) return; // Safety check inside closure
       if (!startTime) startTime = timestamp;
       
       if (!isPlaying) {
@@ -504,7 +587,7 @@ function StoryPlayer({ topic, onComplete, onNext }) {
 
     animFrameRef.current = requestAnimationFrame(animateProgress);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [isPlaying, estimatedSeconds, topic.material.videoUrl, onComplete]);
+  }, [isPlaying, estimatedSeconds, topic.material.videoUrl, topic.material.localVideo, onComplete]);
 
   const togglePlay = () => {
     if (topic.material.videoUrl) return;
@@ -585,15 +668,21 @@ function StoryPlayer({ topic, onComplete, onNext }) {
                 onTimeUpdate={() => {
                   if (videoRef.current) {
                     const ct = videoRef.current.currentTime;
-                    const dur = videoRef.current.duration;
                     setCurrentTime(ct);
+                    let dur = videoRef.current.duration;
+                    if (!dur || isNaN(dur) || dur === Infinity) {
+                      dur = estimatedSeconds || 1; // Fallback to avoid NaN bounce
+                    }
                     const percent = (ct / dur) * 100;
                     setProgress(percent || 0);
                   }
                 }}
                 onLoadedMetadata={() => {
                   if (videoRef.current) {
-                    const dur = videoRef.current.duration;
+                    let dur = videoRef.current.duration;
+                    if (!dur || isNaN(dur) || dur === Infinity) {
+                      dur = estimatedSeconds;
+                    }
                     setDuration(dur);
                     videoRef.current.playbackRate = 1.0;
                   }
@@ -639,10 +728,9 @@ function StoryPlayer({ topic, onComplete, onNext }) {
               onClick={handleSeek}
             >
               <div className="h-2 w-full bg-slate-200/80 rounded-full overflow-hidden relative">
-                <motion.div 
-                  className="h-full bg-blue-500"
+                <div 
+                  className="h-full bg-blue-500 transition-none"
                   style={{ width: `${progress}%` }}
-                  layout
                 />
               </div>
               <div 
@@ -688,14 +776,14 @@ function StoryPlayer({ topic, onComplete, onNext }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="text-center w-full"
+                className="text-center w-full max-h-full overflow-y-auto"
               >
-                <div className="flex flex-wrap justify-center gap-x-2 gap-y-3">
+                <div className="flex flex-wrap justify-center gap-x-2 gap-y-2 md:gap-y-3 pb-2">
                   {activeChunk.words.map((wt, i) => {
                     return (
                       <span
                         key={i}
-                        className="text-xl md:text-2xl lg:text-3xl font-bold px-1 rounded-lg text-[#315588]"
+                        className="text-lg md:text-xl lg:text-2xl font-bold px-1 rounded-lg text-[#315588]"
                       >
                         {wt.word}
                       </span>

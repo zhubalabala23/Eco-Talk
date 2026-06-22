@@ -1,45 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Hash, ArrowRight } from 'lucide-react';
+import { User, Hash, ArrowRight, ChevronLeft } from 'lucide-react';
 import { saveStudent } from './db';
+import bgRegistration from './assets/background_registration/background_registration.png';
 
-const SimpleTree = ({ className }) => (
-  <svg viewBox="0 0 100 120" className={className} xmlns="http://www.w3.org/2000/svg">
-    {/* Trunk */}
-    <path d="M45 120 Q45 80 40 40 L60 40 Q55 80 55 120 Z" fill="#78350f" />
-    {/* Leaves */}
-    <circle cx="50" cy="40" r="35" fill="#15803d" />
-    <circle cx="30" cy="60" r="25" fill="#16a34a" />
-    <circle cx="70" cy="60" r="25" fill="#22c55e" />
-  </svg>
-);
-
-const CharacterWalking = ({ className }) => (
-  <svg viewBox="0 0 150 200" className={className} xmlns="http://www.w3.org/2000/svg">
-    {/* Body */}
-    <rect x="55" y="80" width="40" height="50" rx="10" fill="#f43f5e" />
-    {/* Head */}
-    <circle cx="75" cy="55" r="22" fill="#fca5a5" />
-    {/* Face */}
-    <circle cx="68" cy="51" r="2.5" fill="#334155" />
-    <circle cx="82" cy="51" r="2.5" fill="#334155" />
-    <ellipse cx="75" cy="57" rx="1.5" ry="2.5" fill="#ef4444" opacity="0.5" />
-    <path d="M68 62 Q75 67 82 62" stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" />
-    {/* Hair */}
-    <path d="M50 55 Q75 20 100 55 Z" fill="#475569" />
-    {/* Legs walking */}
-    <path d="M65 125 L55 155" stroke="#0f172a" strokeWidth="12" strokeLinecap="round" />
-    <path d="M85 125 L95 155" stroke="#0f172a" strokeWidth="12" strokeLinecap="round" />
-    {/* Shoes */}
-    <ellipse cx="50" cy="160" rx="10" ry="6" fill="#1e293b" />
-    <ellipse cx="100" cy="160" rx="10" ry="6" fill="#1e293b" />
-    {/* Arms walking */}
-    <path d="M60 90 L40 115" stroke="#fca5a5" strokeWidth="10" strokeLinecap="round" />
-    <path d="M90 90 L110 115" stroke="#fca5a5" strokeWidth="10" strokeLinecap="round" />
-  </svg>
-);
-
-export default function RegistrationView({ onComplete }) {
+export default function RegistrationView({ onComplete, onBack }) {
   const [name, setName] = useState('');
   const [absen, setAbsen] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -66,30 +31,31 @@ export default function RegistrationView({ onComplete }) {
 
   return (
     <>
-      {/* Custom Background for Login Page */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#e0f2fe] to-[#bae6fd] pointer-events-none" style={{ zIndex: 0 }}>
-        {/* Flat Ground */}
-        <div className="absolute bottom-0 left-0 w-full h-[25%] bg-[#4ade80] border-t-[12px] border-[#22c55e]" />
-        
-        {/* Trees on the Left */}
-        <SimpleTree className="absolute bottom-[20%] left-[5%] md:left-[10%] w-32 h-40 md:w-48 md:h-64 opacity-90" />
-        <SimpleTree className="absolute bottom-[22%] left-[20%] md:left-[25%] w-24 h-32 md:w-32 md:h-48 opacity-70" />
+      {/* Custom Background Image for Registration Page */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
+        style={{ backgroundImage: `url(${bgRegistration})`, zIndex: 0 }}
+      />
 
-        {/* Character on the Right */}
-        <motion.div 
-          animate={{ x: [0, 10, 0], y: [0, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[18%] right-[10%] md:right-[20%] w-28 h-40 md:w-40 md:h-56 drop-shadow-md"
+      {/* Header with Back button */}
+      <header className="fixed top-0 left-0 w-full py-6 px-4 md:px-8 flex items-center z-50">
+        <motion.button 
+          onClick={onBack}
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.95 }}
+          className="p-2 rounded-full bg-[#315588] hover:bg-[#233f66] shadow-md"
         >
-          <CharacterWalking className="w-full h-full" />
-        </motion.div>
-      </div>
+          <ChevronLeft className="w-6 h-6 text-white" />
+        </motion.button>
+      </header>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative z-10 bg-white rounded-[2rem] p-6 md:p-8 shadow-xl border border-slate-100 text-center max-w-md mx-auto mt-10"
+        className="relative z-10 bg-white/95 backdrop-blur-sm rounded-[2rem] p-6 md:p-8 shadow-xl border border-slate-100 text-center max-w-md mx-auto mt-10"
       >
         <div className="inline-flex p-4 rounded-full bg-blue-100 mb-6">
           <User className="w-8 h-8 text-blue-700" />

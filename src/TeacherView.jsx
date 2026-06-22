@@ -82,29 +82,20 @@ export default function TeacherView({ onLogout, onHome }) {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-800">
+    <div className="flex h-screen bg-[#e0f2fe] text-slate-800">
       {/* Sidebar */}
       <div className={`${selectedAssessment ? 'hidden md:block' : 'block'} w-full md:w-1/3 lg:w-80 border-r border-slate-200 bg-white overflow-y-auto flex-shrink-0`}>
         <div className="p-3 md:p-4 bg-[#315588] text-white sticky top-0 z-10 flex justify-between items-center shadow-sm">
           <div className="flex items-center gap-2">
-            {onHome && (
-              <button 
-                onClick={onHome}
-                className="md:hidden p-1.5 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
-                title="Kembali ke Beranda"
-              >
-                <Home className="w-5 h-5 text-white" />
-              </button>
-            )}
             <h2 className="text-lg md:text-xl font-bold truncate">Daftar Penilaian</h2>
           </div>
           {onLogout && (
             <button 
               onClick={onLogout}
-              className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 bg-red-500 hover:bg-red-600 rounded-lg text-xs md:text-sm font-bold transition-colors shadow-sm flex-shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 rounded-lg text-xs md:text-sm font-bold transition-colors shadow-sm flex-shrink-0"
             >
               <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="hidden sm:inline">Keluar</span>
+              <span>Logout</span>
             </button>
           )}
         </div>
@@ -141,19 +132,10 @@ export default function TeacherView({ onLogout, onHome }) {
       </div>
 
       {/* Main Content */}
-      <div className={`${!selectedAssessment ? 'hidden md:block' : 'block'} flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50/50`}>
+      <div className={`${!selectedAssessment ? 'hidden md:block' : 'block'} flex-1 p-4 md:p-8 overflow-y-auto bg-[#e0f2fe]/50`}>
         
         {/* Top Action Bar (Aligned with Card) */}
         <div className="max-w-2xl mx-auto w-full flex justify-end mb-4">
-          {onHome && (
-            <button 
-              onClick={onHome}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-200 text-slate-600 hover:text-[#315588] hover:shadow-md transition-all font-bold"
-            >
-              <Home className="w-5 h-5" />
-              <span className="hidden sm:inline">Beranda Utama</span>
-            </button>
-          )}
         </div>
 
         {selectedAssessment ? (

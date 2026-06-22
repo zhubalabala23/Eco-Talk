@@ -1,40 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ClipboardCheck } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ClipboardCheck } from 'lucide-react';
 
-const SimpleTree = ({ className }) => (
-  <svg viewBox="0 0 100 120" className={className} xmlns="http://www.w3.org/2000/svg">
-    {/* Trunk */}
-    <path d="M45 120 Q45 80 40 40 L60 40 Q55 80 55 120 Z" fill="#78350f" />
-    {/* Leaves */}
-    <circle cx="50" cy="40" r="35" fill="#15803d" />
-    <circle cx="30" cy="60" r="25" fill="#16a34a" />
-    <circle cx="70" cy="60" r="25" fill="#22c55e" />
-  </svg>
-);
+import bgGuide from './assets/images/background/background_guideview.png';
 
-const CharacterWalking = ({ className }) => (
-  <svg viewBox="0 0 150 200" className={className} xmlns="http://www.w3.org/2000/svg">
-    {/* Body */}
-    <rect x="55" y="80" width="40" height="50" rx="10" fill="#f43f5e" />
-    {/* Head */}
-    <circle cx="75" cy="55" r="22" fill="#fca5a5" />
-    {/* Face */}
-    <circle cx="68" cy="51" r="2.5" fill="#334155" />
-    <circle cx="82" cy="51" r="2.5" fill="#334155" />
-    <ellipse cx="75" cy="57" rx="1.5" ry="2.5" fill="#ef4444" opacity="0.5" />
-    <path d="M68 62 Q75 67 82 62" stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" />
-    {/* Hair */}
-    <path d="M50 55 Q75 20 100 55 Z" fill="#475569" />
-    {/* Legs walking */}
-    <path d="M65 125 L55 155" stroke="#0f172a" strokeWidth="12" strokeLinecap="round" />
-    <path d="M85 125 L95 155" stroke="#0f172a" strokeWidth="12" strokeLinecap="round" />
-    {/* Shoes */}
-    <ellipse cx="50" cy="160" rx="10" ry="6" fill="#1e293b" />
-    <ellipse cx="100" cy="160" rx="10" ry="6" fill="#1e293b" />
-    {/* Arms walking */}
-    <path d="M60 90 L40 115" stroke="#fca5a5" strokeWidth="10" strokeLinecap="round" />
-    <path d="M90 90 L110 115" stroke="#fca5a5" strokeWidth="10" strokeLinecap="round" />
+const Cloud = ({ className }) => (
+  <svg viewBox="0 0 100 50" className={className} xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>
+    <circle cx="30" cy="25" r="15" fill="white" />
+    <circle cx="50" cy="20" r="20" fill="white" />
+    <circle cx="70" cy="25" r="15" fill="white" />
+    <rect x="30" y="20" width="40" height="20" fill="white" />
   </svg>
 );
 
@@ -46,25 +21,29 @@ const rubricData = [
   { aspect: "Kepercayaan Diri", indicator: "Berbicara dengan percaya diri tanpa ragu-ragu" }
 ];
 
-export default function RubricPage({ onNext }) {
+export default function RubricPage({ onNext, onBack }) {
   return (
     <>
-      {/* Custom Background for Rubric Page */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#e0f2fe] to-[#bae6fd] pointer-events-none" style={{ zIndex: 0 }}>
-        {/* Flat Ground */}
-        <div className="absolute bottom-0 left-0 w-full h-[25%] bg-[#4ade80] border-t-[12px] border-[#22c55e]" />
-        
-        {/* Trees on the Left */}
-        <SimpleTree className="absolute bottom-[20%] left-[5%] md:left-[10%] w-32 h-40 md:w-48 md:h-64 opacity-90" />
-        <SimpleTree className="absolute bottom-[22%] left-[20%] md:left-[25%] w-24 h-32 md:w-32 md:h-48 opacity-70" />
-
-        {/* Character on the Right */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
+        style={{ backgroundImage: `url(${bgGuide})`, zIndex: 0 }}
+      />
+      
+      {/* Animated Clouds */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 5 }}>
         <motion.div 
-          animate={{ x: [0, 10, 0], y: [0, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[18%] right-[10%] md:right-[20%] w-28 h-40 md:w-40 md:h-56 drop-shadow-md"
+          animate={{ x: ['-10vw', '120vw'] }} 
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[5%] w-32 h-16 md:w-48 md:h-24 opacity-80"
         >
-          <CharacterWalking className="w-full h-full" />
+          <Cloud className="w-full h-full" />
+        </motion.div>
+        <motion.div 
+          animate={{ x: ['-10vw', '120vw'] }} 
+          transition={{ duration: 45, repeat: Infinity, ease: "linear", delay: 2 }}
+          className="absolute top-[15%] w-24 h-12 md:w-32 md:h-16 opacity-60"
+        >
+          <Cloud className="w-full h-full" />
         </motion.div>
       </div>
 
@@ -126,22 +105,41 @@ export default function RubricPage({ onNext }) {
           </div>
         </div>
 
-        {/* Floating Interactive Button */}
+        {/* Middle-Right Next Button */}
         <motion.div 
-          className="fixed bottom-8 right-8 md:bottom-12 md:right-12 z-50 flex flex-col items-center"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          className="fixed top-1/2 -translate-y-1/2 right-2 md:right-8 lg:right-12 z-50 flex flex-col items-center"
+          initial={{ x: 50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={onNext}
-            className="p-4 rounded-full bg-[#315588] text-white shadow-2xl hover:bg-[#233f66] transition-colors flex items-center justify-center animate-bounce border-4 border-white/50"
+            className="p-3 rounded-full bg-[#315588] hover:bg-[#233f66] text-white shadow-lg transition-colors flex items-center justify-center animate-bounce"
           >
-            <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
+            <ChevronRight className="w-8 h-8 md:w-10 md:h-10 text-white" strokeWidth={3} />
           </motion.button>
         </motion.div>
+
+        {/* Middle-Left Back Button */}
+        {onBack && (
+          <motion.div 
+            className="fixed top-1/2 -translate-y-1/2 left-2 md:left-8 lg:left-12 z-50 flex flex-col items-center"
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="p-3 rounded-full bg-[#315588] hover:bg-[#233f66] text-white shadow-lg transition-colors flex items-center justify-center animate-bounce"
+            >
+              <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 text-white" strokeWidth={3} />
+            </motion.button>
+          </motion.div>
+        )}
       </motion.div>
     </>
   );
