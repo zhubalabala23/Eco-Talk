@@ -32,7 +32,7 @@ export default function TeacherLoginView({ onLogin, onBack }) {
     <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
       {/* Background Image reused from Registration */}
       <div 
-        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
+        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-cover bg-center"
         style={{ backgroundImage: `url(${bgRegistration})`, zIndex: 0 }}
       />
 

@@ -74,7 +74,7 @@ export default function ObjectivesView({ onNext, onBack }) {
     <div className="fixed inset-0 w-full h-full overflow-y-auto flex flex-col items-center justify-start p-4 md:p-8">
       {/* Background */}
       <div 
-        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
+        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-cover bg-center"
         style={{ backgroundImage: `url(${bgObjectives})`, zIndex: 0 }}
       />
 

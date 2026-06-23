@@ -39,7 +39,7 @@ export default function RegistrationView({ onComplete, onBack }) {
     <>
       {/* Custom Background Image for Registration Page */}
       <div 
-        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
+        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-cover bg-center"
         style={{ backgroundImage: `url(${bgRegistration})`, zIndex: 0 }}
       />
 

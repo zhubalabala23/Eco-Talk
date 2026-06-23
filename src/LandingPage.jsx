@@ -34,89 +34,98 @@ export default function LandingPage({ onStudentStart, onTeacherStart, onScoreDas
       exit={{ opacity: 0, y: -20 }}
       className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden"
     >
-      {/* Custom Background Image */}
-      <div 
-        className="fixed inset-0 w-full h-full bg-no-repeat pointer-events-none bg-[length:100%_100%]"
-        style={{ backgroundImage: `url(${bgLanding})`, zIndex: 0 }}
-      />
-      
-      {/* Decorative background elements */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden" style={{ zIndex: 5 }}>
-        
-        {/* Sun (Static) */}
-        <div className="absolute top-[10%] right-[10%] w-24 h-24 md:w-40 md:h-40">
-          <Sun className="w-full h-full" />
+      {/* Background container that mimics background-size: cover but keeps children in sync */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none select-none z-0">
+        <div 
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 aspect-[16/9]"
+          style={{
+            width: 'max(100vw, calc(100vh * 16 / 9))',
+            height: 'max(100vh, calc(100vw * 9 / 16))'
+          }}
+        >
+          {/* Custom Background Image */}
+          <img 
+            src={bgLanding} 
+            alt="Landing Page Background" 
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          
+          {/* Decorative background elements inside the aspect-locked container */}
+          {/* Sun (Static) */}
+          <div className="absolute top-[10%] right-[10%] w-[8%] aspect-square">
+            <Sun className="w-full h-full" />
+          </div>
+
+          {/* Animated Clouds */}
+          <motion.div 
+            animate={{ x: ['-10%', '110%'] }} 
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute top-[5%] w-[10%] aspect-[2/1] opacity-80"
+          >
+            <Cloud className="w-full h-full" />
+          </motion.div>
+          <motion.div 
+            animate={{ x: ['-10%', '110%'] }} 
+            transition={{ duration: 45, repeat: Infinity, ease: "linear", delay: 2 }}
+            className="absolute top-[15%] w-[7%] aspect-[2/1] opacity-60"
+          >
+            <Cloud className="w-full h-full" />
+          </motion.div>
+          
+          {/* Animated Boat */}
+          <motion.div 
+            animate={{ x: ['-2%', '2%', '-2%'] }} 
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-[14%] left-[45%] w-[5%] z-10 drop-shadow-md"
+          >
+            <img src={imgPerahu} alt="Perahu" className="w-full h-auto" />
+          </motion.div>
+
+          {/* Character: Wanita Menanam (Left, mid-high) */}
+          <motion.div 
+            animate={{ scale: [1, 1.05, 1] }} 
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+            className="absolute bottom-[30%] left-[6%] w-[5%] z-10 drop-shadow-md"
+          >
+            <img src={imgWanitaMenanam} alt="Wanita Menanam" className="w-full h-auto" />
+          </motion.div>
+
+          {/* Character: Pria Menanam (Left, mid) */}
+          <motion.div 
+            animate={{ scale: [1, 1.05, 1] }} 
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            className="absolute bottom-[26%] left-[16%] w-[6%] z-10 drop-shadow-md"
+          >
+            <img src={imgPriaMenanam} alt="Pria Menanam" className="w-full h-auto" />
+          </motion.div>
+
+          {/* Character: Pria Membuang Sampah (Bottom Left) */}
+          <motion.div 
+            animate={{ scale: [1, 1.05, 1] }} 
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+            className="absolute bottom-[6%] left-[20%] w-[7%] z-20 drop-shadow-md"
+          >
+            <img src={imgPriaSampah} alt="Pria Membuang Sampah" className="w-full h-auto" />
+          </motion.div>
+
+          {/* Character: Wanita Membuang Sampah (Bottom Right) */}
+          <motion.div 
+            animate={{ scale: [1, 1.05, 1] }} 
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1.1 }}
+            className="absolute bottom-[4%] right-[24%] w-[6%] z-20 drop-shadow-md"
+          >
+            <img src={imgWanitaSampah} alt="Wanita Membuang Sampah" className="w-full h-auto" />
+          </motion.div>
+
+          {/* Character: Naik Sepeda (Far Right) */}
+          <motion.div 
+            animate={{ scale: [1, 1.05, 1] }} 
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1.4 }}
+            className="absolute bottom-[18%] right-[5%] w-[6%] z-10 drop-shadow-md"
+          >
+            <img src={imgNaikSepeda} alt="Naik Sepeda" className="w-full h-auto" />
+          </motion.div>
         </div>
-
-        {/* Animated Clouds */}
-        <motion.div 
-          animate={{ x: ['-10vw', '120vw'] }} 
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[5%] w-32 h-16 md:w-48 md:h-24 opacity-80"
-        >
-          <Cloud className="w-full h-full" />
-        </motion.div>
-        <motion.div 
-          animate={{ x: ['-10vw', '120vw'] }} 
-          transition={{ duration: 45, repeat: Infinity, ease: "linear", delay: 2 }}
-          className="absolute top-[15%] w-24 h-12 md:w-32 md:h-16 opacity-60"
-        >
-          <Cloud className="w-full h-full" />
-        </motion.div>
-        
-        {/* Animated Boat */}
-        <motion.div 
-          animate={{ x: ['-2vw', '2vw', '-2vw'] }} 
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[14%] left-[45%] w-[8%] md:w-[6%] lg:w-[5%] z-10 drop-shadow-md"
-        >
-          <img src={imgPerahu} alt="Perahu" className="w-full h-auto" />
-        </motion.div>
-
-        {/* Character: Wanita Menanam (Left, mid-high) */}
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }} 
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-          className="absolute bottom-[30%] left-[6%] w-[7%] md:w-[6%] lg:w-[5%] z-10 drop-shadow-md"
-        >
-          <img src={imgWanitaMenanam} alt="Wanita Menanam" className="w-full h-auto" />
-        </motion.div>
-
-        {/* Character: Pria Menanam (Left, mid) */}
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }} 
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-          className="absolute bottom-[26%] left-[16%] w-[8%] md:w-[7%] lg:w-[6%] z-10 drop-shadow-md"
-        >
-          <img src={imgPriaMenanam} alt="Pria Menanam" className="w-full h-auto" />
-        </motion.div>
-
-        {/* Character: Pria Membuang Sampah (Bottom Left) */}
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }} 
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-          className="absolute bottom-[6%] left-[20%] w-[9%] md:w-[8%] lg:w-[7%] z-20 drop-shadow-md"
-        >
-          <img src={imgPriaSampah} alt="Pria Membuang Sampah" className="w-full h-auto" />
-        </motion.div>
-
-        {/* Character: Wanita Membuang Sampah (Bottom Right) */}
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }} 
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1.1 }}
-          className="absolute bottom-[4%] right-[24%] w-[8%] md:w-[7%] lg:w-[6%] z-20 drop-shadow-md"
-        >
-          <img src={imgWanitaSampah} alt="Wanita Membuang Sampah" className="w-full h-auto" />
-        </motion.div>
-
-        {/* Character: Naik Sepeda (Far Right) */}
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }} 
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1.4 }}
-          className="absolute bottom-[18%] right-[5%] w-[9%] md:w-[8%] lg:w-[6%] z-10 drop-shadow-md"
-        >
-          <img src={imgNaikSepeda} alt="Naik Sepeda" className="w-full h-auto" />
-        </motion.div>
       </div>
 
       {/* Main Content */}
