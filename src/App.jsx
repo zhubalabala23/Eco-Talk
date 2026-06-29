@@ -164,14 +164,14 @@ export default function App() {
   const [warmupModalTopic, setWarmupModalTopic] = useState(null);
   const [warmupModalTargetView, setWarmupModalTargetView] = useState(null);
 
-  const navigateTo = (newView, topic = null) => {
+  const navigateTo = (newView, topic = null, forcePassChallenge = false) => {
     let targetTopic = topic || selectedTopic;
     if (topic) setSelectedTopic(targetTopic);
 
     // Intercept navigation to rubric, story, or voice recording if challenge is not completed
     if ((newView === 'rubric' || newView === 'story' || newView === 'answer') && targetTopic) {
       const topicProgress = progress[targetTopic.id] || {};
-      if (!topicProgress.challengeCompleted) {
+      if (!topicProgress.challengeCompleted && !forcePassChallenge) {
         setWarmupModalTopic(targetTopic);
         setWarmupModalTargetView(newView);
         setWarmupModalOpen(true);
@@ -196,9 +196,9 @@ export default function App() {
         const targetView = redirectAfterChallengeView || 'rubric';
         setRedirectAfterChallenge(null);
         setRedirectAfterChallengeView(null);
-        navigateTo(targetView, selectedTopic);
+        navigateTo(targetView, selectedTopic, true);
       } else {
-        navigateTo('pilih-materi');
+        navigateTo('rubric', selectedTopic, true);
       }
     } else {
       navigateTo('home');
