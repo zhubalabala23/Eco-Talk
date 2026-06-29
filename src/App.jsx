@@ -208,6 +208,20 @@ export default function App() {
   const handleLogout = () => {
     const confirmLogout = window.confirm("Apakah Anda yakin ingin keluar?");
     if (confirmLogout) {
+      if (studentInfo?.id) {
+        // Reset challengeCompleted for all topics in the DB
+        const resetProgress = {};
+        Object.keys(progress).forEach(topicId => {
+          resetProgress[topicId] = {
+            ...progress[topicId],
+            challengeCompleted: false
+          };
+        });
+        updateStudentProgress(studentInfo.id, resetProgress).catch(err => {
+          console.error("Failed to reset challenge progress on logout:", err);
+        });
+      }
+
       sessionStorage.removeItem('ecoTalkProgress');
       sessionStorage.removeItem('ecoTalkStudent');
       sessionStorage.removeItem('ecoTalkView');
@@ -221,11 +235,16 @@ export default function App() {
 
   const markProgress = (topicId, type) => {
     setProgress(prev => {
+      const isChallengeCompleted = type === 'challengeCompleted' 
+        ? true 
+        : (type === 'answered' ? false : (prev[topicId]?.challengeCompleted || false));
+
       const nextProgress = {
         ...prev,
         [topicId]: {
           ...(prev[topicId] || {}),
-          [type]: true
+          [type]: true,
+          challengeCompleted: isChallengeCompleted
         }
       };
       sessionStorage.setItem('ecoTalkProgress', JSON.stringify(nextProgress));
