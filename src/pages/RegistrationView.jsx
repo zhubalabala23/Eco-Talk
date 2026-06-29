@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Hash, ArrowRight, ChevronLeft } from 'lucide-react';
-import { saveStudent } from './db';
-import bgRegistration from './assets/background_registration/background_registration.webp';
+import { saveStudent } from '../db';
+import bgRegistration from '../assets/background_registration/background_registration.webp';
 
 export default function RegistrationView({ onComplete, onBack }) {
   const [name, setName] = useState('');

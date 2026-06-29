@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getAssessments, getStudents } from './db';
+import { getAssessments, getStudents } from '../db';
 import { Trophy, ChevronLeft, Medal, Star } from 'lucide-react';
-import { topics } from './data';
+import { topics } from '../data';
 
 export default function ScoreDashboardView({ onBack }) {
   const [studentsData, setStudentsData] = useState([]);

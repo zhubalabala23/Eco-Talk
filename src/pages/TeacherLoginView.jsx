@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, ArrowRight, ChevronLeft } from 'lucide-react';
-import bgRegistration from './assets/background_registration/background_registration.webp';
+import bgRegistration from '../assets/background_registration/background_registration.webp';
 
 export default function TeacherLoginView({ onLogin, onBack }) {
   const [pin, setPin] = useState('');

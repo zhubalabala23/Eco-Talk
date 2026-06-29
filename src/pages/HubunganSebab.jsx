@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Info, Check, AlertCircle, ArrowRight } from 'lucide-react';
 
@@ -99,6 +99,23 @@ export default function HubunganSebab({ topicId, onNext, onBack }) {
   const [slots, setSlots] = useState([null, null, null]);
   const [showFeedback, setShowFeedback] = useState(null); // 'success' or 'error'
   const [draggedOverSlot, setDraggedOverSlot] = useState(null);
+
+  // Shuffle the options list once when topicId changes
+  const shuffledOptions = useMemo(() => {
+    if (!data || !data.options) return [];
+    const optionsCopy = [...data.options];
+    for (let i = optionsCopy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [optionsCopy[i], optionsCopy[j]] = [optionsCopy[j], optionsCopy[i]];
+    }
+    return optionsCopy;
+  }, [topicId, data]);
+
+  // Reset state when topicId changes
+  useEffect(() => {
+    setSlots([null, null, null]);
+    setShowFeedback(null);
+  }, [topicId]);
 
   const handleOptionClick = (option) => {
     // Check if it is already placed
@@ -319,7 +336,7 @@ export default function HubunganSebab({ topicId, onNext, onBack }) {
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {data.options.map((option) => {
+            {shuffledOptions.map((option) => {
               const isPlaced = placedOptionIds.includes(option.id);
               return (
                 <motion.div

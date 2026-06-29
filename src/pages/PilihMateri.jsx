@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Trophy, ArrowRight, Waves, Trash2, Factory, TreePine, Droplets, HelpCircle } from 'lucide-react';
-import { topics } from './data';
+import { topics } from '../data';
 
 const iconMap = {
   Waves,
@@ -87,7 +87,7 @@ export default function PilihMateri({ onSelectTopic, onBack, progress }) {
       <div className="flex justify-center pt-4">
         <button
           onClick={onBack}
-          className="px-6 py-2.5 rounded-full border border-slate-300 hover:bg-slate-50 text-slate-600 text-sm font-semibold transition-colors shadow-sm"
+          className="px-6 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 text-sm font-semibold transition-colors shadow-sm"
         >
           Kembali ke Menu Utama
         </button>

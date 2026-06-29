@@ -2,37 +2,182 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Check, Info, AlertCircle, ArrowRight } from 'lucide-react';
 
+// Import local assets for banjir topic
+import asapImg from '../assets/images_object/banjir/asap.webp';
+import banjirImg from '../assets/images_object/banjir/banjir.webp';
+import hujanImg from '../assets/images_object/banjir/hujan.webp';
+import ikanImg from '../assets/images_object/banjir/ikan.webp';
+import matahariImg from '../assets/images_object/banjir/matahari.webp';
+import mobilImg from '../assets/images_object/banjir/mobil.webp';
+import nyamukImg from '../assets/images_object/banjir/nyamuk.webp';
+import penebanganImg from '../assets/images_object/banjir/penebangan.webp';
+import pohonImg from '../assets/images_object/banjir/pohon.webp';
+import sampahImg from '../assets/images_object/banjir/sampah.webp';
+import selokanImg from '../assets/images_object/banjir/selokan.webp';
+import sepedaImg from '../assets/images_object/banjir/sepeda.webp';
+
+const banjirImages = {
+  asap: asapImg,
+  banjir: banjirImg,
+  hujan: hujanImg,
+  ikan: ikanImg,
+  matahari: matahariImg,
+  mobil: mobilImg,
+  nyamuk: nyamukImg,
+  penebangan: penebanganImg,
+  pohon: pohonImg,
+  sampah: sampahImg,
+  selokan: selokanImg,
+  sepeda: sepedaImg
+};
+
+// Import local assets for sampah topic
+import anginImg from '../assets/images_object/sampah/angin.webp';
+import awanImg from '../assets/images_object/sampah/awan.webp';
+import bauImg from '../assets/images_object/sampah/bau.webp';
+import bersihImg from '../assets/images_object/sampah/bersih.webp';
+import bintangImg from '../assets/images_object/sampah/bintang.webp';
+import gunungImg from '../assets/images_object/sampah/gunung.webp';
+import kertasImg from '../assets/images_object/sampah/kertas.webp';
+import lalatImg from '../assets/images_object/sampah/lalat.webp';
+import organikImg from '../assets/images_object/sampah/organik.webp';
+import pasirImg from '../assets/images_object/sampah/pasir.webp';
+import plastikImg from '../assets/images_object/sampah/plastik.webp';
+import sungaiImg from '../assets/images_object/sampah/sungai.webp';
+
+const sampahImages = {
+  angin: anginImg,
+  awan: awanImg,
+  bau: bauImg,
+  bersih: bersihImg,
+  bintang: bintangImg,
+  gunung: gunungImg,
+  kertas: kertasImg,
+  lalat: lalatImg,
+  organik: organikImg,
+  pasir: pasirImg,
+  plastik: plastikImg,
+  sungai: sungaiImg
+};
+
+// Import local assets for polusi topic
+import airKeruhImg from '../assets/images_object/polusi/air_keruh.webp';
+import asapPolusiImg from '../assets/images_object/polusi/asap.webp';
+import batukImg from '../assets/images_object/polusi/batuk.webp';
+import bonekaImg from '../assets/images_object/polusi/boneka.webp';
+import bulanImg from '../assets/images_object/polusi/bulan.webp';
+import bungaImg from '../assets/images_object/polusi/bunga.webp';
+import cokelatImg from '../assets/images_object/polusi/cokelat.webp';
+import kendaraanImg from '../assets/images_object/polusi/kendaraan.webp';
+import kotorImg from '../assets/images_object/polusi/kotor.webp';
+import mainanImg from '../assets/images_object/polusi/mainan.webp';
+import pabrikImg from '../assets/images_object/polusi/pabrik.webp';
+import sesakNapasImg from '../assets/images_object/polusi/sesak_napas.webp';
+
+const polusiImages = {
+  air_keruh: airKeruhImg,
+  asap: asapPolusiImg,
+  batuk: batukImg,
+  boneka: bonekaImg,
+  bulan: bulanImg,
+  bunga: bungaImg,
+  cokelat: cokelatImg,
+  kendaraan: kendaraanImg,
+  kotor: kotorImg,
+  mainan: mainanImg,
+  pabrik: pabrikImg,
+  sesak_napas: sesakNapasImg
+};
+
+// Import local assets for pohon topic
+import akarImg from '../assets/images_object/menanam_pohon/akar.webp';
+import asapPohonImg from '../assets/images_object/menanam_pohon/asap.webp';
+import besiImg from '../assets/images_object/menanam_pohon/besi.webp';
+import burungImg from '../assets/images_object/menanam_pohon/burung.webp';
+import kacaImg from '../assets/images_object/menanam_pohon/kaca.webp';
+import longsorImg from '../assets/images_object/menanam_pohon/longsor.webp';
+import oksigenImg from '../assets/images_object/menanam_pohon/oksigen.webp';
+import plastikPohonImg from '../assets/images_object/menanam_pohon/plastik.webp';
+import sejukImg from '../assets/images_object/menanam_pohon/sejuk.webp';
+import semenImg from '../assets/images_object/menanam_pohon/semen.webp';
+import tanahImg from '../assets/images_object/menanam_pohon/tanah.webp';
+import teduhImg from '../assets/images_object/menanam_pohon/teduh.webp';
+
+const pohonImages = {
+  akar: akarImg,
+  asap: asapPohonImg,
+  besi: besiImg,
+  burung: burungImg,
+  kaca: kacaImg,
+  longsor: longsorImg,
+  oksigen: oksigenImg,
+  plastik: plastikPohonImg,
+  sejuk: sejukImg,
+  semen: semenImg,
+  tanah: tanahImg,
+  teduh: teduhImg
+};
+
+// Import local assets for air bersih topic
+import bukuImg from '../assets/images_object/air_bersih/buku.webp';
+import diareImg from '../assets/images_object/air_bersih/diare.webp';
+import handphoneImg from '../assets/images_object/air_bersih/handphone.webp';
+import jernihImg from '../assets/images_object/air_bersih/jernih.webp';
+import keranImg from '../assets/images_object/air_bersih/keran.webp';
+import keretaImg from '../assets/images_object/air_bersih/kereta.webp';
+import kumanImg from '../assets/images_object/air_bersih/kuman.webp';
+import minumImg from '../assets/images_object/air_bersih/minum.webp';
+import pensilImg from '../assets/images_object/air_bersih/pensil.webp';
+import penyakitImg from '../assets/images_object/air_bersih/penyakit.webp';
+import sepatuImg from '../assets/images_object/air_bersih/sepatu.webp';
+import sungaiAirImg from '../assets/images_object/air_bersih/sungai.webp';
+
+const airImages = {
+  buku: bukuImg,
+  diare: diareImg,
+  handphone: handphoneImg,
+  jernih: jernihImg,
+  keran: keranImg,
+  kereta: keretaImg,
+  kuman: kumanImg,
+  minum: minumImg,
+  pensil: pensilImg,
+  penyakit: penyakitImg,
+  sepatu: sepatuImg,
+  sungai: sungaiAirImg
+};
+
 const challengeData = {
   banjir: {
     title: 'Banjir',
-    instruction: 'Pilih semua kata yang berhubungan dengan banjir!',
+    instruction: 'Pilih 5 kata yang berhubungan dengan banjir!',
     tip: 'Tips: Pilih semua kata yang menurutmu berkaitan dengan banjir.',
     words: [
       { id: 'w1', text: 'Sampah', related: true, emoji: '🗑️', imageName: 'sampah' },
       { id: 'w2', text: 'Hujan', related: true, emoji: '🌧️', imageName: 'hujan' },
       { id: 'w3', text: 'Selokan', related: true, emoji: '🛣️', imageName: 'selokan' },
       { id: 'w4', text: 'Banjir', related: true, emoji: '🌊', imageName: 'banjir' },
-      { id: 'w5', text: 'Pohon', related: true, emoji: '🌳', imageName: 'pohon' },
+      { id: 'w5', text: 'Pohon', related: false, emoji: '🌳', imageName: 'pohon' },
       { id: 'w6', text: 'Matahari', related: false, emoji: '☀️', imageName: 'matahari' },
       { id: 'w7', text: 'Sepeda', related: false, emoji: '🚲', imageName: 'sepeda' },
       { id: 'w8', text: 'Asap', related: false, emoji: '💨', imageName: 'asap' },
-      { id: 'w9', text: 'Nyamuk', related: true, emoji: '🦟', imageName: 'nyamuk' },
+      { id: 'w9', text: 'Nyamuk', related: false, emoji: '🦟', imageName: 'nyamuk' },
       { id: 'w10', text: 'Ikan', related: false, emoji: '🐟', imageName: 'ikan' },
       { id: 'w11', text: 'Mobil', related: false, emoji: '🚗', imageName: 'mobil' },
-      { id: 'w12', text: 'Rumah', related: true, emoji: '🏠', imageName: 'rumah' }
+      { id: 'w12', text: 'Penebangan', related: true, emoji: '🪓', imageName: 'penebangan' }
     ]
   },
   sampah: {
     title: 'Sampah',
-    instruction: 'Pilih semua kata yang berhubungan dengan sampah!',
+    instruction: 'Pilih 5 kata yang berhubungan dengan sampah!',
     tip: 'Tips: Pilih semua kata yang menurutmu berkaitan dengan penumpukan sampah.',
     words: [
       { id: 'w1', text: 'Plastik', related: true, emoji: '🥤', imageName: 'plastik' },
       { id: 'w2', text: 'Organik', related: true, emoji: '🍎', imageName: 'organik' },
-      { id: 'w3', text: 'Sungai', related: true, emoji: '🏞️', imageName: 'sungai' },
+      { id: 'w3', text: 'Sungai', related: false, emoji: '🏞️', imageName: 'sungai' },
       { id: 'w4', text: 'Lalat', related: true, emoji: '🪰', imageName: 'lalat' },
       { id: 'w5', text: 'Bau', related: true, emoji: '🤢', imageName: 'bau' },
-      { id: 'w6', text: 'Kertas', related: true, emoji: '📄', imageName: 'kertas' },
+      { id: 'w6', text: 'Kertas', related: false, emoji: '📄', imageName: 'kertas' },
       { id: 'w7', text: 'Angin', related: false, emoji: '💨', imageName: 'angin' },
       { id: 'w8', text: 'Bintang', related: false, emoji: '⭐', imageName: 'bintang' },
       { id: 'w9', text: 'Pasir', related: false, emoji: '⏳', imageName: 'pasir' },
@@ -43,15 +188,15 @@ const challengeData = {
   },
   polusi: {
     title: 'Polusi',
-    instruction: 'Pilih semua kata yang berhubungan dengan polusi!',
+    instruction: 'Pilih 5 kata yang berhubungan dengan polusi!',
     tip: 'Tips: Pilih semua kata yang menurutmu berkaitan dengan pencemaran lingkungan.',
     words: [
       { id: 'w1', text: 'Asap', related: true, emoji: '💨', imageName: 'asap' },
       { id: 'w2', text: 'Pabrik', related: true, emoji: '🏭', imageName: 'pabrik' },
       { id: 'w3', text: 'Batuk', related: true, emoji: '😷', imageName: 'batuk' },
       { id: 'w4', text: 'Kendaraan', related: true, emoji: '🚗', imageName: 'kendaraan' },
-      { id: 'w5', text: 'Kotor', related: true, emoji: '🪰', imageName: 'kotor' },
-      { id: 'w6', text: 'Air Keruh', related: true, emoji: '🧪', imageName: 'air_keruh' },
+      { id: 'w5', text: 'Kotor', related: false, emoji: '🪰', imageName: 'kotor' },
+      { id: 'w6', text: 'Air Keruh', related: false, emoji: '🧪', imageName: 'air_keruh' },
       { id: 'w7', text: 'Sesak Napas', related: true, emoji: '🫁', imageName: 'sesak_napas' },
       { id: 'w8', text: 'Mainan', related: false, emoji: '🧸', imageName: 'mainan' },
       { id: 'w9', text: 'Boneka', related: false, emoji: '🪆', imageName: 'boneka' },
@@ -62,15 +207,15 @@ const challengeData = {
   },
   pohon: {
     title: 'Menanam Pohon',
-    instruction: 'Pilih semua kata yang berhubungan dengan menanam pohon!',
+    instruction: 'Pilih 5 kata yang berhubungan dengan menanam pohon!',
     tip: 'Tips: Pilih semua kata yang menurutmu berkaitan dengan pentingnya menanam pohon.',
     words: [
       { id: 'w1', text: 'Oksigen', related: true, emoji: '💨', imageName: 'oksigen' },
       { id: 'w2', text: 'Akar', related: true, emoji: '🌱', imageName: 'akar' },
       { id: 'w3', text: 'Sejuk', related: true, emoji: '🍃', imageName: 'sejuk' },
       { id: 'w4', text: 'Tanah', related: true, emoji: '🪵', imageName: 'tanah' },
-      { id: 'w5', text: 'Longsor', related: true, emoji: '⛰️', imageName: 'longsor' },
-      { id: 'w6', text: 'Burung', related: true, emoji: '🐦', imageName: 'burung' },
+      { id: 'w5', text: 'Longsor', related: false, emoji: '⛰️', imageName: 'longsor' },
+      { id: 'w6', text: 'Burung', related: false, emoji: '🐦', imageName: 'burung' },
       { id: 'w7', text: 'Teduh', related: true, emoji: '⛱️', imageName: 'teduh' },
       { id: 'w8', text: 'Plastik', related: false, emoji: '🥤', imageName: 'plastik' },
       { id: 'w9', text: 'Kaca', related: false, emoji: '🔍', imageName: 'kaca' },
@@ -81,7 +226,7 @@ const challengeData = {
   },
   air: {
     title: 'Air Bersih',
-    instruction: 'Pilih semua kata yang berhubungan dengan air bersih!',
+    instruction: 'Pilih 5 kata yang berhubungan dengan air bersih!',
     tip: 'Tips: Pilih semua kata yang menurutmu berkaitan dengan menjaga air bersih.',
     words: [
       { id: 'w1', text: 'Sungai', related: true, emoji: '🏞️', imageName: 'sungai' },
@@ -89,8 +234,8 @@ const challengeData = {
       { id: 'w3', text: 'Minum', related: true, emoji: '🥛', imageName: 'minum' },
       { id: 'w4', text: 'Jernih', related: true, emoji: '💧', imageName: 'jernih' },
       { id: 'w5', text: 'Kuman', related: true, emoji: '🦠', imageName: 'kuman' },
-      { id: 'w6', text: 'Penyakit', related: true, emoji: '🤢', imageName: 'penyakit' },
-      { id: 'w7', text: 'Diare', related: true, emoji: '🤮', imageName: 'diare' },
+      { id: 'w6', text: 'Penyakit', related: false, emoji: '🤢', imageName: 'penyakit' },
+      { id: 'w7', text: 'Diare', related: false, emoji: '🤮', imageName: 'diare' },
       { id: 'w8', text: 'Kereta', related: false, emoji: '🚂', imageName: 'kereta' },
       { id: 'w9', text: 'Handphone', related: false, emoji: '📱', imageName: 'handphone' },
       { id: 'w10', text: 'Sepatu', related: false, emoji: '👟', imageName: 'sepatu' },
@@ -100,42 +245,75 @@ const challengeData = {
   }
 };
 
-function WordItem({ word, isSelected, onClick }) {
+
+function WordItem({ word, topicId, isSelected, onClick }) {
   const [imageError, setImageError] = useState(false);
-  const imagePath = `/challenge/${word.imageName || word.text.toLowerCase().replace(/\s+/g, '_')}.webp`;
+  
+  let imagePath = `/challenge/${word.imageName || word.text.toLowerCase().replace(/\s+/g, '_')}.webp`;
+  
+  const key = word.imageName || word.text.toLowerCase().replace(/\s+/g, '_');
+  if (topicId === 'banjir') {
+    if (banjirImages[key]) {
+      imagePath = banjirImages[key];
+    }
+  } else if (topicId === 'sampah') {
+    if (sampahImages[key]) {
+      imagePath = sampahImages[key];
+    }
+  } else if (topicId === 'polusi') {
+    if (polusiImages[key]) {
+      imagePath = polusiImages[key];
+    }
+  } else if (topicId === 'pohon') {
+    if (pohonImages[key]) {
+      imagePath = pohonImages[key];
+    }
+  } else if (topicId === 'air') {
+    if (airImages[key]) {
+      imagePath = airImages[key];
+    }
+  }
 
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`flex flex-col items-center justify-center p-3 md:p-5 rounded-2xl border-2 transition-all aspect-square text-center gap-2 relative overflow-hidden ${
+      className={`flex flex-col items-center justify-between rounded-2xl border-2 transition-all aspect-square text-center relative overflow-hidden group ${
         isSelected
-          ? 'border-blue-400 bg-blue-50/50 shadow-md shadow-blue-100'
-          : 'border-slate-150 hover:border-slate-300 bg-slate-50/30'
+          ? 'border-blue-400 bg-blue-50/20 shadow-md shadow-blue-100'
+          : 'border-slate-200 hover:border-slate-300 bg-slate-50/20'
       }`}
     >
       {/* Active check indicator */}
       {isSelected && (
-        <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-0.5 shadow-sm z-20">
-          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+        <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-1 shadow-sm z-20">
+          <Check className="w-3.5 h-3.5 text-white" strokeWidth={3.5} />
         </div>
       )}
       
-      {!imageError ? (
-        <img 
-          src={imagePath} 
-          alt={word.text} 
-          onError={() => setImageError(true)}
-          className="w-12 h-12 md:w-16 md:h-16 object-contain mb-1 transition-transform" 
-        />
-      ) : (
-        <span className="text-3xl md:text-4xl mb-1">{word.emoji}</span>
-      )}
+      {/* Image Container */}
+      <div className="flex-1 w-full h-full overflow-hidden flex items-center justify-center bg-slate-50/30 relative">
+        {!imageError ? (
+          <img 
+            src={imagePath} 
+            alt={word.text} 
+            onError={() => setImageError(true)}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+          />
+        ) : (
+          <span className="text-3xl md:text-4xl">{word.emoji}</span>
+        )}
+      </div>
       
-      <span className="text-xs md:text-sm font-bold text-slate-700 leading-tight">
+      {/* Text Label with divider boundary */}
+      <div className={`w-full py-2.5 px-1.5 text-xs md:text-sm font-bold leading-tight border-t transition-colors ${
+        isSelected 
+          ? 'bg-blue-50/80 border-blue-400 text-blue-700' 
+          : 'bg-white border-slate-200 text-slate-700'
+      }`}>
         {word.text}
-      </span>
+      </div>
     </motion.button>
   );
 }
@@ -267,6 +445,7 @@ export default function EcoWorldHunt({ topicId, onNext, onBack }) {
             <WordItem 
               key={word.id}
               word={word}
+              topicId={topicId}
               isSelected={selectedIds.includes(word.id)}
               onClick={() => handleToggleWord(word.id)}
             />

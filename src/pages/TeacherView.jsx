@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getAssessments, updateAssessment, getStudents, deleteAssessment, deleteStudentAndAssessments } from './db';
+import { getAssessments, updateAssessment, getStudents, deleteAssessment, deleteStudentAndAssessments } from '../db';
 import { Play, Pause, CheckCircle2, ChevronRight, Save, LogOut, Trash2, ChevronLeft, Home } from 'lucide-react';
-import { topics } from './data';
+import { topics } from '../data';
 
 export default function TeacherView({ onLogout, onHome }) {
   const [assessments, setAssessments] = useState([]);
