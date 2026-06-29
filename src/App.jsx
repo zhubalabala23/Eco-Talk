@@ -11,6 +11,10 @@ import RubricPage from './RubricPage';
 import ObjectivesView from './ObjectivesView';
 import GuideView from './GuideView';
 import ScoreDashboardView from './ScoreDashboardView';
+import PilihMateri from './PilihMateri';
+import EcoWorldHunt from './EcoWorldHunt';
+import HubunganSebab from './HubunganSebab';
+import KataPenghubung from './KataPenghubung';
 import { saveAssessment, getStudentAssessments, updateStudentProgress, getStudent } from './db';
 import ceweAudio from './assets/images/cewe_audio.webp';
 import bgGuide from './assets/images/background/background_guideview.webp';
@@ -60,7 +64,19 @@ export default function App() {
     if (!studentId) return;
     try {
       const studentData = await getStudent(studentId);
-      const studentProgress = studentData?.progress || {};
+      if (!studentData) {
+        // Student was deleted from Firestore (reset by teacher)
+        sessionStorage.removeItem('ecoTalkProgress');
+        sessionStorage.removeItem('ecoTalkStudent');
+        sessionStorage.removeItem('ecoTalkView');
+        sessionStorage.removeItem('ecoTalkTopic');
+        setProgress({});
+        setStudentInfo(null);
+        setSelectedTopic(null);
+        setView('landing');
+        return;
+      }
+      const studentProgress = studentData.progress || {};
 
       const studentAssessments = await getStudentAssessments(studentId);
       const dbProgressMap = {};
@@ -77,7 +93,8 @@ export default function App() {
         Object.keys(studentProgress).forEach(topicId => {
           merged[topicId] = {
             listened: studentProgress[topicId]?.listened || false,
-            answered: studentProgress[topicId]?.answered || false
+            answered: studentProgress[topicId]?.answered || false,
+            challengeCompleted: studentProgress[topicId]?.challengeCompleted || false
           };
         });
 
@@ -85,7 +102,8 @@ export default function App() {
         Object.keys(prev).forEach(topicId => {
           merged[topicId] = {
             listened: merged[topicId]?.listened || prev[topicId]?.listened || false,
-            answered: merged[topicId]?.answered || prev[topicId]?.answered || false
+            answered: merged[topicId]?.answered || prev[topicId]?.answered || false,
+            challengeCompleted: merged[topicId]?.challengeCompleted || prev[topicId]?.challengeCompleted || false
           };
         });
 
@@ -94,7 +112,8 @@ export default function App() {
           if (!merged[topicId]) {
             merged[topicId] = {
               listened: false,
-              answered: true
+              answered: true,
+              challengeCompleted: false
             };
           } else {
             merged[topicId].answered = true;
@@ -139,14 +158,50 @@ export default function App() {
     }
   }, [selectedTopic]);
 
+  const [redirectAfterChallenge, setRedirectAfterChallenge] = useState(null);
+  const [redirectAfterChallengeView, setRedirectAfterChallengeView] = useState(null);
+  const [warmupModalOpen, setWarmupModalOpen] = useState(false);
+  const [warmupModalTopic, setWarmupModalTopic] = useState(null);
+  const [warmupModalTargetView, setWarmupModalTargetView] = useState(null);
+
   const navigateTo = (newView, topic = null) => {
-    if (topic) setSelectedTopic(topic);
+    let targetTopic = topic || selectedTopic;
+    if (topic) setSelectedTopic(targetTopic);
+
+    // Intercept navigation to rubric, story, or voice recording if challenge is not completed
+    if ((newView === 'rubric' || newView === 'story' || newView === 'answer') && targetTopic) {
+      const topicProgress = progress[targetTopic.id] || {};
+      if (!topicProgress.challengeCompleted) {
+        setWarmupModalTopic(targetTopic);
+        setWarmupModalTargetView(newView);
+        setWarmupModalOpen(true);
+        return;
+      }
+    }
+
     setView(newView);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Refresh student progress from DB when going back to home
     if (newView === 'home' && studentInfo?.id) {
       refreshStudentProgress(studentInfo.id);
+    }
+  };
+
+  const handleCompleteChallenge = () => {
+    if (selectedTopic) {
+      markProgress(selectedTopic.id, 'challengeCompleted');
+      
+      if (redirectAfterChallenge === selectedTopic.id) {
+        const targetView = redirectAfterChallengeView || 'rubric';
+        setRedirectAfterChallenge(null);
+        setRedirectAfterChallengeView(null);
+        navigateTo(targetView, selectedTopic);
+      } else {
+        navigateTo('pilih-materi');
+      }
+    } else {
+      navigateTo('home');
     }
   };
 
@@ -253,6 +308,20 @@ export default function App() {
                     navigateTo('landing');
                   } else if (view === 'objectives') {
                     navigateTo('home');
+                  } else if (view === 'pilih-materi') {
+                    navigateTo('home');
+                  } else if (view === 'eco-world-hunt') {
+                    if (redirectAfterChallenge === selectedTopic?.id) {
+                      setRedirectAfterChallenge(null);
+                      setRedirectAfterChallengeView(null);
+                      navigateTo('home');
+                    } else {
+                      navigateTo('pilih-materi');
+                    }
+                  } else if (view === 'hubungan-sebab') {
+                    navigateTo('eco-world-hunt');
+                  } else if (view === 'kata-penghubung') {
+                    navigateTo('hubungan-sebab');
                   } else {
                     navigateTo('landing');
                   }
@@ -403,6 +472,50 @@ export default function App() {
               progress={progress} 
               onSelect={(topic) => navigateTo('rubric', topic)} 
               onScoreDashboard={() => navigateTo('dashboard')}
+              onStartChallenge={() => navigateTo('pilih-materi')}
+            />
+          )}
+          {view === 'pilih-materi' && (
+            <PilihMateri 
+              key="pilih-materi"
+              progress={progress}
+              onSelectTopic={(topic) => {
+                setSelectedTopic(topic);
+                navigateTo('eco-world-hunt', topic);
+              }}
+              onBack={() => navigateTo('home')}
+            />
+          )}
+          {view === 'eco-world-hunt' && selectedTopic && (
+            <EcoWorldHunt 
+              key="eco-world-hunt"
+              topicId={selectedTopic.id}
+              onNext={() => navigateTo('hubungan-sebab')}
+              onBack={() => {
+                if (redirectAfterChallenge === selectedTopic.id) {
+                  setRedirectAfterChallenge(null);
+                  setRedirectAfterChallengeView(null);
+                  navigateTo('home');
+                } else {
+                  navigateTo('pilih-materi');
+                }
+              }}
+            />
+          )}
+          {view === 'hubungan-sebab' && selectedTopic && (
+            <HubunganSebab 
+              key="hubungan-sebab"
+              topicId={selectedTopic.id}
+              onNext={() => navigateTo('kata-penghubung')}
+              onBack={() => navigateTo('eco-world-hunt')}
+            />
+          )}
+          {view === 'kata-penghubung' && selectedTopic && (
+            <KataPenghubung 
+              key="kata-penghubung"
+              topicId={selectedTopic.id}
+              onCompleteChallenge={handleCompleteChallenge}
+              onBack={() => navigateTo('hubungan-sebab')}
             />
           )}
           {view === 'story' && selectedTopic && (
@@ -440,6 +553,32 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Custom Warm-up Warning Modal */}
+      <AnimatePresence>
+        {warmupModalOpen && warmupModalTopic && (
+          <WarmupWarningModal 
+            topic={warmupModalTopic} 
+            onClose={() => {
+              setWarmupModalOpen(false);
+              setWarmupModalTopic(null);
+              setWarmupModalTargetView(null);
+            }}
+            onConfirm={() => {
+              const topic = warmupModalTopic;
+              const targetView = warmupModalTargetView || 'rubric';
+              setWarmupModalOpen(false);
+              setWarmupModalTopic(null);
+              setWarmupModalTargetView(null);
+              
+              setRedirectAfterChallenge(topic.id);
+              setRedirectAfterChallengeView(targetView);
+              setView('eco-world-hunt');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
     )}
     </AnimatePresence>
@@ -447,7 +586,7 @@ export default function App() {
 }
 
 // 1. Home View / Material Picker
-function HomeView({ onSelect, progress, studentInfo, onScoreDashboard }) {
+function HomeView({ onSelect, progress, studentInfo, onScoreDashboard, onStartChallenge }) {
   return (
     <motion.div 
       initial={{ opacity: 0, x: -20 }}
@@ -463,6 +602,27 @@ function HomeView({ onSelect, progress, studentInfo, onScoreDashboard }) {
           <p className="text-sm text-slate-600 font-semibold">Pilih topik ajaib untuk memulai petualanganmu.</p>
         </div>
       </div>
+
+      {/* New Eco Challenge Warmup Banner */}
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        onClick={onStartChallenge}
+        className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-3xl p-6 shadow-lg border border-emerald-400/30 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all relative overflow-hidden"
+      >
+        <div className="space-y-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 bg-white/25 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+            ⚡ Pemanasan: Eco Challenge
+          </div>
+          <h3 className="text-2xl font-black tracking-tight">Eco Challenge Pemanasan</h3>
+          <p className="text-sm text-emerald-50/90 font-medium max-w-xl">
+            Selesaikan tantangan mencocokkan kata dan sebab-akibat untuk membuka kunci perekaman suara materi!
+          </p>
+        </div>
+        <button className="bg-white text-emerald-700 font-black px-6 py-3 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-sm whitespace-nowrap self-start md:self-auto relative z-10">
+          Mulai Pemanasan
+        </button>
+      </motion.div>
       
       <div className="grid gap-4 md:grid-cols-2">
         {topics.map((topic) => {
@@ -1080,6 +1240,56 @@ function VoiceAnswer({ topic, studentInfo, onFinish, onHome, hasSubmitted }) {
         alt="Audio Instructor" 
         className="absolute right-0 bottom-0 w-[140px] md:w-[220px] object-contain drop-shadow-xl pointer-events-none z-0 hidden sm:block"
       />
+    </motion.div>
+  );
+}
+
+// Custom Warning Modal Component for Warm-up constraint
+function WarmupWarningModal({ topic, onClose, onConfirm }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 20 }}
+        transition={{ type: 'spring', duration: 0.5 }}
+        className="w-full max-w-md bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-100 text-center relative overflow-hidden"
+      >
+        {/* Decorative background shape */}
+        <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full ${topic.color} opacity-20`} />
+        
+        <div className="inline-flex p-4 rounded-full bg-amber-50 text-amber-500 mb-6 relative z-10">
+          <Lock className="w-8 h-8" />
+        </div>
+
+        <h3 className="text-2xl font-black text-slate-800 mb-3 relative z-10">
+          Ayo Pemanasan Dulu! ⚡
+        </h3>
+        
+        <p className="text-slate-600 mb-8 relative z-10 leading-relaxed text-sm md:text-base">
+          Kamu perlu menyelesaikan tantangan <strong>Eco Challenge (Pemanasan)</strong> untuk topik <strong>{topic.title}</strong> terlebih dahulu sebelum merekam suara atau membaca materi ini!
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3 relative z-10">
+          <button
+            onClick={onClose}
+            className="flex-1 px-6 py-3 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold transition-all text-sm"
+          >
+            Nanti Saja
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`flex-1 px-6 py-3 rounded-2xl text-slate-800 font-extrabold shadow-md hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2 ${topic.color} ${topic.shadow}`}
+          >
+            Mulai Pemanasan <ArrowRight className="w-4 h-4 text-slate-800" />
+          </button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getAssessments, updateAssessment, getStudents, deleteAssessment } from './db';
+import { getAssessments, updateAssessment, getStudents, deleteAssessment, deleteStudentAndAssessments } from './db';
 import { Play, Pause, CheckCircle2, ChevronRight, Save, LogOut, Trash2, ChevronLeft, Home } from 'lucide-react';
 import { topics } from './data';
 
@@ -68,9 +68,19 @@ export default function TeacherView({ onLogout, onHome }) {
 
   const handleDelete = async () => {
     if (!selectedAssessment) return;
-    const confirmDelete = window.confirm("Apakah Anda yakin ingin menghapus data penilaian ini?");
+    const student = students[selectedAssessment.studentId];
+    const studentName = student ? student.name : 'Siswa';
+    const confirmDelete = window.confirm(
+      student 
+        ? `Apakah Anda yakin ingin menghapus data penilaian dan mereset data siswa "${studentName}"? Siswa akan dapat mengisi kembali nama dan nomor absen mereka.`
+        : "Apakah Anda yakin ingin menghapus data penilaian ini?"
+    );
     if (confirmDelete) {
-      await deleteAssessment(selectedAssessment.id);
+      if (selectedAssessment.studentId && selectedAssessment.studentId !== 'anonymous') {
+        await deleteStudentAndAssessments(selectedAssessment.studentId);
+      } else {
+        await deleteAssessment(selectedAssessment.id);
+      }
       setSelectedAssessment(null);
       loadData();
     }

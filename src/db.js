@@ -132,6 +132,24 @@ export const deleteAssessment = async (id) => {
   await deleteDoc(docRef);
 };
 
+export const deleteStudentAndAssessments = async (studentId) => {
+  if (!studentId || studentId === 'anonymous') return;
+  
+  // 1. Delete all assessments for this student
+  const assessmentsRef = collection(db, 'assessments');
+  const q = query(assessmentsRef, where("studentId", "==", studentId));
+  const querySnapshot = await getDocs(q);
+  
+  const deletePromises = querySnapshot.docs.map(docSnapshot => 
+    deleteDoc(doc(db, 'assessments', docSnapshot.id))
+  );
+  await Promise.all(deletePromises);
+  
+  // 2. Delete the student document
+  const studentRef = doc(db, 'students', studentId);
+  await deleteDoc(studentRef);
+};
+
 export const getStudentAssessments = async (studentId) => {
   if (!studentId) return [];
   const assessmentsRef = collection(db, 'assessments');
